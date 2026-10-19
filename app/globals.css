@@ -903,7 +903,6 @@ select:focus {
   height: 20px;
 }
 
-
 /* Sprint 14 design system carried forward into Sprint 15. */
 :root {
   --ink: #20242b;
@@ -1014,7 +1013,9 @@ body {
 }
 .auth-art h1 {
   color: #20242b;
-  font: 800 clamp(38px, 4vw, 56px) / 1.15 Manrope, sans-serif;
+  font:
+    800 clamp(38px, 4vw, 56px) / 1.15 Manrope,
+    sans-serif;
   letter-spacing: -2.5px;
   margin: 22px 0 18px;
   max-width: 480px;
@@ -1121,7 +1122,9 @@ body {
   border-radius: 15px;
   background: #f0eeff;
   color: #6658d3;
-  font: 800 21px Manrope, sans-serif;
+  font:
+    800 21px Manrope,
+    sans-serif;
 }
 .form-kicker {
   margin: 0 0 9px;
@@ -1132,7 +1135,9 @@ body {
 }
 .form-card h2 {
   margin: 0;
-  font: 800 28px / 1.25 Manrope, sans-serif;
+  font:
+    800 28px / 1.25 Manrope,
+    sans-serif;
   letter-spacing: -1px;
 }
 .form-subtitle {
@@ -1165,7 +1170,9 @@ body {
   color: #20242b;
   font-size: 13px;
   font-weight: 400;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .field input:focus {
   border-color: #8b7df2;
@@ -1201,7 +1208,9 @@ body {
   width: min(100%, 390px);
 }
 .auth-card h2 {
-  font: 800 28px Manrope, sans-serif;
+  font:
+    800 28px Manrope,
+    sans-serif;
 }
 .auth-card > p {
   color: #777e8b;
@@ -1256,7 +1265,9 @@ body {
 .welcome-copy h2 {
   margin: 17px 0 12px;
   color: #ffffff;
-  font: 800 clamp(25px, 3vw, 35px) / 1.25 Manrope, sans-serif;
+  font:
+    800 clamp(25px, 3vw, 35px) / 1.25 Manrope,
+    sans-serif;
   letter-spacing: -1.2px;
 }
 .welcome-copy p {
@@ -1321,7 +1332,9 @@ body {
   background: linear-gradient(145deg, #8e80f4, #5e50bd);
   box-shadow: 0 12px 45px #8b7df255;
   color: #ffffff;
-  font: 800 42px Manrope, sans-serif;
+  font:
+    800 42px Manrope,
+    sans-serif;
 }
 .art-float {
   display: grid;
@@ -1348,7 +1361,9 @@ body {
   bottom: 27px;
 }
 .page-head h1 {
-  font: 800 26px Manrope, sans-serif;
+  font:
+    800 26px Manrope,
+    sans-serif;
   letter-spacing: -0.8px;
 }
 .page-head {
