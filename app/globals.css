@@ -1482,3 +1482,114 @@ body {
     font-size: 18px;
   }
 }
+
+
+/* Match the Sprint 14 signed-in user area and brand mark in the Sprint 15 shell. */
+.topbar .brand {
+  gap: 11px;
+  font-size: 18px;
+  letter-spacing: -0.9px;
+}
+
+.topbar .brand-mark {
+  display: grid;
+  flex: 0 0 34px;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+.topbar .brand-mark svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+
+.topbar .brand-light {
+  color: #77718e;
+  font-weight: 500;
+}
+
+.top-actions {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 18px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+}
+
+.top-actions .avatar {
+  flex: 0 0 34px;
+}
+
+.user-mini {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+
+.user-mini b {
+  overflow: hidden;
+  color: #343844;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-mini small {
+  overflow: hidden;
+  color: #858b98;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signout-button {
+  display: grid;
+  flex: 0 0 30px;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #e9ebf0;
+  border-radius: 8px;
+  background: #fff;
+  color: #777e8b;
+}
+
+.signout-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.signout-button:hover {
+  border-color: #c9c1ff;
+  background: #f7f5ff;
+  color: #6658d3;
+}
+
+.signout-button:focus-visible {
+  outline: 3px solid #aca4ff;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .top-actions {
+    width: auto;
+    margin-top: 0;
+    padding-top: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .user-mini {
+    display: none;
+  }
+}
