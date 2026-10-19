@@ -1,6 +1,15 @@
 # TaskMatrix — Sprint 15
 
-A Next.js + Supabase task management dashboard implementing authenticated, user-scoped CRUD and task analytics.
+Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authentication foundation. It keeps the Next.js App Router, Supabase Auth, responsive purple-and-white workspace UI, and adds authenticated task CRUD and analytics.
+
+## Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/login` | Sign in to TaskMatrix |
+| `/register` | Create an account |
+| `/dashboard` | Protected workspace with task CRUD and analytics |
+| `/` | Entry point; shows sign-in when signed out and workspace when signed in |
 
 ## Sprint 15 scope
 - Read: hydrate the signed-in user's tasks from Supabase.
@@ -12,9 +21,10 @@ A Next.js + Supabase task management dashboard implementing authenticated, user-
 
 ## Stack
 - Next.js App Router, React, TypeScript
-- Supabase Auth + Postgres
+- Supabase Auth + Postgres (`@supabase/ssr` session cookies)
+- Middleware route protection for `/dashboard`, `/login`, and `/register`
 - Recharts
-- Tailwind CSS
+- Responsive CSS design system aligned with Sprint 14
 
 ## Setup
 1. Install Node.js 20+.
