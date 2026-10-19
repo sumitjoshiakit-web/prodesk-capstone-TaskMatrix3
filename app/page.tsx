@@ -718,7 +718,9 @@ export default function Home() {
             <span className="eyebrow">THE FOUNDATION</span>
             <h2>Your overview</h2>
           </div>
-          <span className="live-label"><span /> WORKSPACE LIVE</span>
+          <span className="live-label">
+            <span /> WORKSPACE LIVE
+          </span>
         </div>
         {error && (
           <div className="notice" role="alert">

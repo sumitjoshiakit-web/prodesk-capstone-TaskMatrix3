@@ -1452,7 +1452,9 @@ body {
 .section-heading h2 {
   margin: 7px 0 0;
   color: #20242b;
-  font: 800 20px Manrope, sans-serif;
+  font:
+    800 20px Manrope,
+    sans-serif;
   letter-spacing: -0.6px;
 }
 .live-label {
