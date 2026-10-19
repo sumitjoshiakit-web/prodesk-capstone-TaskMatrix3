@@ -902,3 +902,527 @@ select:focus {
   width: 20px;
   height: 20px;
 }
+
+
+/* Sprint 14 design system carried forward into Sprint 15. */
+:root {
+  --ink: #20242b;
+  --muted: #777e8b;
+  --line: #e9ebf0;
+  --paper: #f8f9fb;
+  --green: #6658d3;
+  --green-dark: #5144b7;
+  --mint: #f0eeff;
+  --white: #ffffff;
+}
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+.topbar {
+  background: #ffffff;
+  border-right-color: #eceef2;
+}
+.container {
+  background: #f8f9fb;
+}
+.stat,
+.panel,
+.task-card {
+  border-color: #e9ebf0;
+  box-shadow: 0 2px 5px #142a1708;
+}
+.btn.primary {
+  background: #6658d3;
+  border-color: #6658d3;
+}
+.btn.primary:hover {
+  background: #5144b7;
+  border-color: #5144b7;
+}
+.btn:not(.primary):hover {
+  background: #f7f5ff;
+}
+.eyebrow {
+  color: #6658d3;
+}
+.stat-icon,
+.avatar {
+  background: #e9e5ff;
+  color: #6658d3;
+}
+.stat-value {
+  color: #20242b;
+}
+.side-item.active {
+  background: #f0eeff;
+  color: #6658d3;
+}
+.side-item:hover {
+  background: #f7f5ff;
+  color: #6658d3;
+}
+.auth-wrap {
+  grid-template-columns: 1fr 0.9fr;
+  background: #ffffff;
+}
+.auth-art {
+  background: #f6f5ff;
+  color: #20242b;
+  padding: 38px clamp(25px, 5vw, 76px);
+}
+.auth-art::after {
+  border-color: #e6e2ff;
+  box-shadow:
+    0 0 0 42px #f0eeff,
+    0 0 0 43px #e9e6ff,
+    0 0 0 90px #f2f0ff;
+}
+.auth-art .brand {
+  color: #20242b;
+  font-family: Manrope, sans-serif;
+  letter-spacing: -0.9px;
+}
+.auth-art .brand-mark {
+  background: #6658d3;
+  border-radius: 12px;
+}
+.brand-light {
+  color: #77718e;
+  font-weight: 500;
+}
+.auth-content {
+  max-width: 480px;
+  margin: auto 0;
+  padding: 55px 0;
+  position: relative;
+  z-index: 1;
+}
+.auth-art .eyebrow {
+  color: #7e789e !important;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
+.eyebrow-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: #8b7df2;
+}
+.auth-art h1 {
+  color: #20242b;
+  font: 800 clamp(38px, 4vw, 56px) / 1.15 Manrope, sans-serif;
+  letter-spacing: -2.5px;
+  margin: 22px 0 18px;
+  max-width: 480px;
+}
+.auth-art h1 span {
+  color: #6658d3;
+}
+.auth-art p,
+.auth-art .auth-description {
+  color: #77778a;
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 410px;
+}
+.feature-list {
+  display: grid;
+  gap: 22px;
+  margin-top: 37px;
+}
+.feature-list > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.feature-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f0eeff;
+  color: #6658d3;
+  font-size: 15px;
+  font-weight: 700;
+}
+.feature-list b,
+.feature-list small {
+  display: block;
+}
+.feature-list b {
+  color: #20242b;
+  font-size: 13px;
+}
+.feature-list small {
+  color: #858597;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.panel-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #a09bb7;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+.form-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 38px clamp(24px, 5vw, 74px) 25px;
+  background: #ffffff;
+}
+.form-top {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  color: #777e8b;
+  font-size: 12px;
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #6658d3;
+  font-size: 12px;
+  font-weight: 700;
+}
+.text-link:hover {
+  color: #5144b7;
+}
+.form-card {
+  width: 100%;
+  max-width: 380px;
+  margin: auto;
+  align-self: center;
+  padding: 40px 0;
+}
+.form-icon {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 47px;
+  margin-bottom: 24px;
+  border: 1px solid #e6e2ff;
+  border-radius: 15px;
+  background: #f0eeff;
+  color: #6658d3;
+  font: 800 21px Manrope, sans-serif;
+}
+.form-kicker {
+  margin: 0 0 9px;
+  color: #6658d3;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+.form-card h2 {
+  margin: 0;
+  font: 800 28px / 1.25 Manrope, sans-serif;
+  letter-spacing: -1px;
+}
+.form-subtitle {
+  margin: 10px 0 27px;
+  color: #777e8b;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.field {
+  display: grid;
+  gap: 9px;
+  color: #414652;
+  font-size: 12px;
+  font-weight: 700;
+}
+.field input {
+  width: 100%;
+  min-width: 0;
+  height: 47px;
+  padding: 0 13px;
+  border: 1px solid #e3e5eb;
+  border-radius: 9px;
+  outline: 0;
+  background: #ffffff;
+  color: #20242b;
+  font-size: 13px;
+  font-weight: 400;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input:focus {
+  border-color: #8b7df2;
+  box-shadow: 0 0 0 3px #f0eeff;
+}
+.field input::placeholder {
+  color: #a4a8b2;
+}
+.auth-submit {
+  width: 100%;
+  min-height: 47px;
+  margin-top: 3px;
+  border-radius: 9px;
+}
+.auth-foot,
+.secure-note {
+  margin-top: 20px;
+  color: #777e8b;
+  font-size: 11px;
+  line-height: 1.7;
+  text-align: center;
+}
+.secure-note {
+  margin-bottom: 0;
+}
+.form-help {
+  margin-top: 22px;
+  color: #777e8b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.auth-card {
+  width: min(100%, 390px);
+}
+.auth-card h2 {
+  font: 800 28px Manrope, sans-serif;
+}
+.auth-card > p {
+  color: #777e8b;
+}
+.password-toggle {
+  border-color: #e3e5eb;
+  color: #6658d3;
+}
+.password-toggle:hover {
+  background: #f7f5ff;
+  border-color: #c9c1ff;
+}
+.password-toggle:focus-visible {
+  outline-color: #8b7df2;
+}
+.loading {
+  background: #f8f9fb;
+}
+.spinner {
+  border-color: #e6e2ff;
+  border-top-color: #6658d3;
+}
+
+/* The Sprint 14 welcome panel remains the visual anchor above Sprint 15 CRUD. */
+.welcome-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  min-height: 260px;
+  margin: 0 0 26px;
+  padding: 32px 35px;
+  overflow: hidden;
+  border-radius: 17px;
+  background: #25213f;
+  color: #ffffff;
+}
+.welcome-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 490px;
+}
+.welcome-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c4bbff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.welcome-copy h2 {
+  margin: 17px 0 12px;
+  color: #ffffff;
+  font: 800 clamp(25px, 3vw, 35px) / 1.25 Manrope, sans-serif;
+  letter-spacing: -1.2px;
+}
+.welcome-copy p {
+  max-width: 400px;
+  color: #c0bed0;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.welcome-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 13px;
+  border-radius: 8px;
+  background: #554b80;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+.welcome-caption {
+  color: #b2adc9;
+  font-size: 10px;
+}
+.welcome-art {
+  display: grid;
+  place-items: center;
+  position: relative;
+  flex: 0 0 200px;
+  width: 200px;
+  height: 200px;
+  margin: 0 20px;
+}
+.art-orbit {
+  position: absolute;
+  border: 1px solid #ffffff1a;
+  border-radius: 50%;
+}
+.orbit-one {
+  width: 185px;
+  height: 110px;
+  transform: rotate(-24deg);
+}
+.orbit-two {
+  width: 140px;
+  height: 190px;
+  transform: rotate(38deg);
+}
+.art-center {
+  display: grid;
+  place-items: center;
+  width: 85px;
+  height: 85px;
+  transform: rotate(-8deg);
+  border-radius: 25px;
+  background: linear-gradient(145deg, #8e80f4, #5e50bd);
+  box-shadow: 0 12px 45px #8b7df255;
+  color: #ffffff;
+  font: 800 42px Manrope, sans-serif;
+}
+.art-float {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #ffffff1a;
+  border-radius: 13px;
+  background: #373153;
+  color: #c7bdff;
+  font-size: 17px;
+}
+.float-one {
+  top: 17px;
+  right: 8px;
+}
+.float-two {
+  bottom: 20px;
+  left: 2px;
+}
+.float-three {
+  right: 0;
+  bottom: 27px;
+}
+.page-head h1 {
+  font: 800 26px Manrope, sans-serif;
+  letter-spacing: -0.8px;
+}
+.page-head {
+  margin-bottom: 25px;
+}
+.panel,
+.stat,
+.task-card {
+  background: #ffffff;
+}
+.panel-head h2,
+.task-card h3 {
+  color: #20242b;
+}
+.search,
+.filters .filter,
+.modal,
+.auth-card {
+  border-color: #e9ebf0;
+}
+@media (max-width: 850px) {
+  .auth-wrap {
+    grid-template-columns: 1fr;
+  }
+  .auth-art {
+    min-height: auto;
+    padding: 34px 28px;
+  }
+  .auth-content {
+    padding: 38px 0;
+  }
+  .feature-list {
+    gap: 15px;
+    margin-top: 25px;
+  }
+  .panel-bottom {
+    display: none;
+  }
+  .form-panel {
+    min-height: auto;
+    padding: 26px 28px 34px;
+  }
+  .form-card {
+    padding: 38px 0 15px;
+  }
+  .welcome-card {
+    padding: 27px;
+  }
+  .welcome-art {
+    margin-right: 0;
+  }
+}
+@media (max-width: 560px) {
+  .welcome-card {
+    min-height: auto;
+    padding: 24px;
+  }
+  .welcome-art {
+    display: none;
+  }
+  .welcome-copy h2 {
+    font-size: 27px;
+  }
+  .form-top {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .form-panel {
+    padding: 25px 22px 30px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field input,
+  .password-toggle {
+    transition: none;
+  }
+}
