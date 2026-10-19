@@ -632,10 +632,14 @@ export default function Home() {
   return (
     <div className="shell">
       <header className="topbar">
-        <a className="brand" href="#" aria-label="TaskMatrix home">
-          <span className="brand-mark">T</span>
+        <a className="brand" href="/dashboard" aria-label="TaskMatrix home">
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M8 3v18M16 3v18M3 8h18M3 16h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </span>
           <span>
-            TaskMatrix<small>PROJECT WORKSPACE</small>
+            task<span className="brand-light">matrix</span>
           </span>
         </a>
         <div className="workspace-label">WORKSPACE</div>
@@ -651,19 +655,19 @@ export default function Home() {
           </a>
         </nav>
         <div className="top-actions">
-          <span
-            className="user-email"
-            style={{ fontSize: 13, color: "var(--muted)" }}
-          >
-            {user.email}
-          </span>
           <span className="avatar" aria-label="Signed in user">
             {(user.user_metadata?.full_name || user.email || "U")
               .slice(0, 1)
               .toUpperCase()}
           </span>
-          <button className="btn small" onClick={signOut}>
-            Sign out
+          <div className="user-mini">
+            <b>{user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}</b>
+            <small>{user.email}</small>
+          </div>
+          <button className="signout-button" onClick={signOut} aria-label="Sign out" title="Sign out">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 012 2v14a2 2 0 01-2 2h-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </header>
