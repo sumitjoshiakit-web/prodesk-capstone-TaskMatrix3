@@ -15,7 +15,7 @@ export default function Home() {
   const supabase = useMemo(() => getSupabase(), []);
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">(() => typeof window !== "undefined" && window.location.pathname === "/register" ? "signup" : "login");
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
