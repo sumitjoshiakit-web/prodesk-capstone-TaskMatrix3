@@ -346,217 +346,108 @@ export default function Home() {
     );
   if (!supabase)
     return (
-      <div className="auth-wrap">
+      <main className="auth-wrap">
         <section className="auth-art">
-          <div className="brand">
-            <span className="brand-mark">T</span> TaskMatrix
-          </div>
-          <div>
-            <div className="eyebrow" style={{ color: "#a8d7b7" }}>
-              ONE SPACE. CLEAR PROGRESS.
+          <a className="brand" href="/" aria-label="TaskMatrix home">
+            <span className="brand-mark">T</span>
+            <span>task<span className="brand-light">matrix</span></span>
+          </a>
+          <div className="auth-content">
+            <span className="eyebrow"><span className="eyebrow-dot" /> YOUR WORKSPACE, REFOCUSED</span>
+            <h1>Make room for<br /><span>meaningful work.</span></h1>
+            <p className="auth-description">A calmer way to organize the work that moves you forward. Pick up where your best ideas begin.</p>
+            <div className="feature-list">
+              <div><span className="feature-symbol">✓</span><span><b>Clarity over clutter</b><small>Keep your next steps in focus.</small></span></div>
+              <div><span className="feature-symbol">▦</span><span><b>Everything in its place</b><small>One home for your priorities.</small></span></div>
+              <div><span className="feature-symbol">◇</span><span><b>Your space stays yours</b><small>Secure sign-in for your workspace.</small></span></div>
             </div>
-            <h1>Your work, moving forward.</h1>
-            <p>
-              A calm, focused workspace for turning your team&apos;s plans into
-              progress.
-            </p>
           </div>
-          <p>TaskMatrix · Sprint 15</p>
+          <div className="panel-bottom"><span>BUILT FOR YOUR NEXT BIG THING</span><span>© 2026 TASKMATRIX</span></div>
         </section>
-        <main className="auth-main">
-          <div className="auth-card">
+        <section className="form-panel">
+          <div className="form-top"><span>Workspace setup</span></div>
+          <div className="form-card">
+            <div className="form-icon">T</div>
+            <p className="form-kicker">ONE LAST STEP</p>
             <h2>Connect your workspace</h2>
-            <p>
-              Set your Supabase environment variables to enable sign-in and
-              cloud storage.
-            </p>
-            <div className="notice">
-              Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to
-              your .env.local file. Then restart the development server.
-            </div>
-            <p>Need help? Open the README setup instructions.</p>
+            <p className="form-subtitle">Add your Supabase project details to enable sign-in and cloud storage.</p>
+            <div className="notice">Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your .env.local file, then restart the development server.</div>
+            <p className="form-help">Need help? Open the README setup instructions.</p>
           </div>
-        </main>
-      </div>
+        </section>
+      </main>
     );
 
   if (!user)
     return (
-      <div className="auth-wrap">
+      <main className="auth-wrap">
         <section className="auth-art">
-          <div className="brand">
+          <a className="brand" href="/" aria-label="TaskMatrix home">
             <span className="brand-mark">T</span>
-            <span>
-              TaskMatrix<small>PROJECT WORKSPACE</small>
-            </span>
-          </div>
-          <div>
-            <div className="eyebrow" style={{ color: "#a8d7b7" }}>
-              ONE SPACE. CLEAR PROGRESS.
+            <span>task<span className="brand-light">matrix</span></span>
+          </a>
+          <div className="auth-content">
+            <span className="eyebrow"><span className="eyebrow-dot" /> YOUR WORKSPACE, REFOCUSED</span>
+            <h1>Make room for<br /><span>meaningful work.</span></h1>
+            <p className="auth-description">A calmer way to organize the work that moves you forward. Pick up where your best ideas begin.</p>
+            <div className="feature-list">
+              <div><span className="feature-symbol">✓</span><span><b>Clarity over clutter</b><small>Keep your next steps in focus.</small></span></div>
+              <div><span className="feature-symbol">▦</span><span><b>Everything in its place</b><small>One home for your priorities.</small></span></div>
+              <div><span className="feature-symbol">◇</span><span><b>Your space stays yours</b><small>Secure sign-in for your workspace.</small></span></div>
             </div>
-            <h1>Your work, moving forward.</h1>
-            <p>
-              Bring your tasks into focus. Plan the next step, keep momentum,
-              and celebrate what gets done.
-            </p>
           </div>
-          <div className="auth-bottom">
-            <p>
-              ✳ &nbsp; Thoughtfully built for people who make things happen.
-            </p>
-          </div>
+          <div className="panel-bottom"><span>BUILT FOR YOUR NEXT BIG THING</span><span>© 2026 TASKMATRIX</span></div>
         </section>
-        <main className="auth-main">
-          <div className="auth-card">
-            <div className="eyebrow">
-              {authMode === "login" ? "WELCOME BACK" : "GET STARTED"}
-            </div>
-            <h2>
-              {authMode === "login"
-                ? "Sign in to TaskMatrix"
-                : "Create your account"}
-            </h2>
-            <p>
-              {authMode === "login"
-                ? "Pick up where you left off. Your tasks are waiting."
-                : "A clearer week starts with a simple plan."}
-            </p>
-            <form onSubmit={handleAuth}>
+        <section className="form-panel">
+          <div className="form-top">
+            <span>{authMode === "login" ? "Don't have an account?" : "Already have an account?"}</span>
+            <button className="text-link" type="button" onClick={() => {
+              const nextMode = authMode === "login" ? "signup" : "login";
+              setAuthMode(nextMode);
+              window.history.replaceState({}, "", nextMode === "signup" ? "/register" : "/login");
+              setError("");
+              setNotice("");
+            }}>{authMode === "login" ? "Get started ↗" : "Sign in ↗"}</button>
+          </div>
+          <div className="form-card">
+            <div className="form-icon">T</div>
+            <p className="form-kicker">{authMode === "login" ? "WELCOME BACK" : "GET STARTED"}</p>
+            <h2>{authMode === "login" ? "Sign in to TaskMatrix" : "Create your account"}</h2>
+            <p className="form-subtitle">{authMode === "login" ? "Enter your details to access your workspace." : "Create your account and make space for meaningful work."}</p>
+            <form className="form-stack" onSubmit={handleAuth}>
               {authMode === "signup" && (
                 <div className="field">
                   <label htmlFor="fullName">Full name</label>
-                  <input
-                    id="fullName"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Your name"
-                    maxLength={80}
-                    required
-                    autoComplete="name"
-                  />
+                  <input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your name" maxLength={80} required autoComplete="name" />
                 </div>
               )}
               <div className="field">
                 <label htmlFor="email">Email address</label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
+                <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email" />
               </div>
               <div className="field">
                 <label htmlFor="password">Password</label>
                 <div className="password-input-wrap">
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
-                    minLength={6}
-                    required
-                    autoComplete={
-                      authMode === "login" ? "current-password" : "new-password"
-                    }
-                  />
-                  <button
-                    className="password-toggle"
-                    type="button"
-                    onClick={() => setShowPassword((value) => !value)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    title={showPassword ? "Hide password" : "Show password"}
-                  >
+                  <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" minLength={6} required autoComplete={authMode === "login" ? "current-password" : "new-password"} />
+                  <button className="password-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"}>
                     {showPassword ? (
-                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                        />
-                        <path
-                          d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.3 3.3M6.2 6.3C3.8 7.8 2.6 10 2.5 12c.5 1.3 4 7 9.5 7 1 0 2-.2 2.9-.6"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.2-2.3 3.3M6.2 6.3C3.8 7.8 2.6 10 2.5 12c.5 1.3 4 7 9.5 7 1 0 2-.2 2.9-.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     ) : (
-                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-                        <path
-                          d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinejoin="round"
-                        />
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="3"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                        />
-                      </svg>
+                      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" /></svg>
                     )}
                   </button>
                 </div>
               </div>
-              {error && (
-                <div
-                  className="error"
-                  role="alert"
-                  style={{ marginBottom: 14 }}
-                >
-                  {error}
-                </div>
-              )}
-              {notice && (
-                <div
-                  className="success"
-                  role="status"
-                  style={{ marginBottom: 14 }}
-                >
-                  {notice}
-                </div>
-              )}
-              <button className="btn primary" type="submit" disabled={busy}>
-                {busy
-                  ? "Please wait…"
-                  : authMode === "login"
-                    ? "Sign in →"
-                    : "Create account →"}
+              {error && <div className="error" role="alert">{error}</div>}
+              {notice && <div className="success" role="status">{notice}</div>}
+              <button className="btn primary auth-submit" type="submit" disabled={busy}>
+                {busy ? "Please wait…" : authMode === "login" ? "Sign in →" : "Create account →"}
               </button>
             </form>
-            <div className="auth-foot">
-              {authMode === "login"
-                ? "New to TaskMatrix? "
-                : "Already have an account? "}
-              <button
-                onClick={() => {
-                  const nextMode = authMode === "login" ? "signup" : "login";
-                  setAuthMode(nextMode);
-                  window.history.replaceState(
-                    {},
-                    "",
-                    nextMode === "signup" ? "/register" : "/login",
-                  );
-                  setError("");
-                  setNotice("");
-                }}
-              >
-                {authMode === "login" ? "Create an account" : "Sign in"}
-              </button>
-            </div>
+            <p className="secure-note">🔒 Secure authentication. Your workspace stays yours.</p>
           </div>
-        </main>
-      </div>
+        </section>
+      </main>
     );
 
   return (
