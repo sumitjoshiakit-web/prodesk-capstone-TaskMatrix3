@@ -109,3 +109,48 @@
 @media (prefers-reduced-motion: reduce) {
   .side-item { transition: none; }
 }
+
+
+/* Accessible show/hide control for the password field. */
+.password-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.password-input-wrap input {
+  flex: 1;
+  min-width: 0;
+}
+
+.password-toggle {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.password-toggle:hover {
+  background: #f4f7f3;
+  border-color: #cbd7cd;
+}
+
+.password-toggle:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+}
+
+.password-toggle svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
