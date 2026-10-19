@@ -1441,3 +1441,42 @@ body {
     transition: none;
   }
 }
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  margin: 29px 0 15px;
+}
+.section-heading h2 {
+  margin: 7px 0 0;
+  color: #20242b;
+  font: 800 20px Manrope, sans-serif;
+  letter-spacing: -0.6px;
+}
+.live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding-bottom: 3px;
+  color: #777e8b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+.live-label > span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #27b583;
+}
+@media (max-width: 560px) {
+  .section-heading {
+    align-items: flex-start;
+  }
+  .section-heading h2 {
+    font-size: 18px;
+  }
+}
