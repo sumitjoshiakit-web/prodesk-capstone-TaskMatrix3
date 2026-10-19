@@ -1,10 +1,20 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest, type ResponseCookie } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 type CookieToSet = {
   name: string;
   value: string;
-  options?: Partial<ResponseCookie>;
+  options?: {
+    domain?: string;
+    expires?: Date;
+    httpOnly?: boolean;
+    maxAge?: number;
+    path?: string;
+    sameSite?: boolean | "lax" | "strict" | "none";
+    secure?: boolean;
+    priority?: "low" | "medium" | "high";
+    partitioned?: boolean;
+  };
 };
 
 export async function middleware(request: NextRequest) {
