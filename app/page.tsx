@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { getSupabase, type Task, type TaskPriority, type TaskStatus } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
