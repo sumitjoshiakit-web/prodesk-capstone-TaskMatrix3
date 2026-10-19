@@ -4,14 +4,15 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 ## Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/login` | Sign in to TaskMatrix |
-| `/register` | Create an account |
-| `/dashboard` | Protected workspace with task CRUD and analytics |
-| `/` | Entry point; shows sign-in when signed out and workspace when signed in |
+| Route        | Purpose                                                                 |
+| ------------ | ----------------------------------------------------------------------- |
+| `/login`     | Sign in to TaskMatrix                                                   |
+| `/register`  | Create an account                                                       |
+| `/dashboard` | Protected workspace with task CRUD and analytics                        |
+| `/`          | Entry point; shows sign-in when signed out and workspace when signed in |
 
 ## Sprint 15 scope
+
 - Read: hydrate the signed-in user's tasks from Supabase.
 - Create: validate and persist new tasks.
 - Update: edit existing tasks in a prefilled dialog.
@@ -20,6 +21,7 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 - Security: Supabase Row Level Security (RLS) ensures each user can access only their own records.
 
 ## Stack
+
 - Next.js App Router, React, TypeScript
 - Supabase Auth + Postgres (`@supabase/ssr` session cookies)
 - Middleware route protection for `/dashboard`, `/login`, and `/register`
@@ -27,6 +29,7 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 - Responsive CSS design system aligned with Sprint 14
 
 ## Setup
+
 1. Install Node.js 20+.
 2. Run `npm install`.
 3. Copy `.env.example` to `.env.local` and add your Supabase project URL and anon/publishable key.
@@ -34,9 +37,11 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 5. Run `npm run dev` and open `http://localhost:3000`.
 
 ## Environment
+
 `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are required. Never put a Supabase service-role key in the browser.
 
 ## Validation checklist
+
 - Register/sign in with Supabase Auth.
 - Create, edit, complete, filter, and delete a task.
 - Confirm refresh retains data and a second user cannot see the first user's tasks.
