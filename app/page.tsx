@@ -670,17 +670,10 @@ export default function Home() {
       <main className="container">
         <section className="page-head">
           <div>
-            <div className="eyebrow">YOUR OVERVIEW</div>
-            <h1>
-              Good to see you
-              {user.user_metadata?.full_name
-                ? `, ${user.user_metadata.full_name.split(" ")[0]}`
-                : ""}
-              .
-            </h1>
+            <div className="eyebrow">MONDAY MINDSET, EVERY DAY</div>
+            <h1>Your workspace</h1>
             <p className="sub">
-              A little progress each day adds up. Here&apos;s where things
-              stand.
+              Your priorities, tasks and progress—together in one place.
             </p>
           </div>
           <button className="btn primary" onClick={openCreate}>
@@ -720,6 +713,13 @@ export default function Home() {
             <div className="art-float float-three">✦</div>
           </div>
         </section>
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">THE FOUNDATION</span>
+            <h2>Your overview</h2>
+          </div>
+          <span className="live-label"><span /> WORKSPACE LIVE</span>
+        </div>
         {error && (
           <div className="notice" role="alert">
             {error}
