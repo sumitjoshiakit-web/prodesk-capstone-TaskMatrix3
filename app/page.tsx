@@ -508,6 +508,25 @@ export default function Home() {
             ＋ &nbsp; New task
           </button>
         </section>
+        <section className="welcome-card" aria-label="Workspace welcome">
+          <div className="welcome-copy">
+            <span className="welcome-tag">✦ YOUR SPACE TO DO GREAT WORK</span>
+            <h2>Good to have you here,<br />{(user.user_metadata?.full_name || user.email || "there").split(" ")[0]}.</h2>
+            <p>Your workspace is ready. Start with one clear priority and build momentum from there.</p>
+            <div className="welcome-actions">
+              <span className="welcome-status">✓ You’re signed in</span>
+              <span className="welcome-caption">Your next chapter starts here.</span>
+            </div>
+          </div>
+          <div className="welcome-art" aria-hidden="true">
+            <div className="art-orbit orbit-one" />
+            <div className="art-orbit orbit-two" />
+            <div className="art-center">T</div>
+            <div className="art-float float-one">✓</div>
+            <div className="art-float float-two">▦</div>
+            <div className="art-float float-three">✦</div>
+          </div>
+        </section>
         {error && (
           <div className="notice" role="alert">
             {error}
@@ -575,12 +594,12 @@ export default function Home() {
                       >
                         <stop
                           offset="0%"
-                          stopColor="#276749"
+                          stopColor="#6658d3"
                           stopOpacity={0.22}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#276749"
+                          stopColor="#6658d3"
                           stopOpacity={0}
                         />
                       </linearGradient>
@@ -613,7 +632,7 @@ export default function Home() {
                       type="monotone"
                       dataKey="completed"
                       name="Completed"
-                      stroke="#276749"
+                      stroke="#6658d3"
                       strokeWidth={2.5}
                       fill="url(#completionFill)"
                       activeDot={{ r: 5 }}
