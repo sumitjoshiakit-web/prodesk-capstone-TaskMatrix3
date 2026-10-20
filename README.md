@@ -24,7 +24,7 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 The Sprint 13 PRD proposed projects, a five-column board (Backlog, To Do, In Progress, Review, Done), team membership, task assignments, comments, and activity history. The Sprint 15 implementation currently delivers a user-owned task list with three statuses (To do, In progress, Completed), priority, due date, search/filtering, CRUD, and dashboard metrics. Projects, the five-column board, team members/assignees, comments, and activity history are **not implemented**. This is an explicit scope reduction from the planning PRD, not a claim that every PRD feature is complete.
 
-Sprint 14 introduced a Zustand auth store. Sprint 15 currently manages auth/task state with component-local React state and does not hydrate the Sprint 14 Zustand store. This is an architecture continuity gap to address before calling the full capstone architecture-complete.
+Sprint 15 now restores the Sprint 14 Zustand auth store for the authenticated user payload. Task data, filters, and modal state remain local to the main client page; the large page still needs a component-level refactor.
 
 
 - Read: hydrate the signed-in user's tasks from Supabase.
@@ -72,6 +72,6 @@ Use this checklist during final manual verification; do not mark a check complet
 
 ## Architecture follow-up before capstone-wide submission
 
-- [ ] Restore or deliberately replace the Sprint 14 Zustand auth-store integration.
+- [x] Restore the Sprint 14 Zustand auth-store integration for the current user payload.
 - [ ] Split the large client page into focused components (for example, `AuthForm`, `TaskTable`, `TaskModal`, and `Charts`) without changing behavior.
 - [ ] Decide whether to add projects and a project-to-tasks relationship, or retain the reduced task-only scope and get the PRD/README accepted as a documented change.
