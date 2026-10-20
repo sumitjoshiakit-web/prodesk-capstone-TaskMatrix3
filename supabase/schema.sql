@@ -69,6 +69,9 @@ create table if not exists public.projects (
   created_at timestamptz not null default now()
 );
 create index if not exists projects_owner_created_idx on public.projects(owner_id, created_at desc);
+update public.tasks t set project_id = null where t.project_id is not null and not exists (select 1 from public.projects p where p.id = t.project_id);
+alter table public.tasks drop constraint if exists tasks_project_id_fkey;
+alter table public.tasks add constraint tasks_project_id_fkey foreign key (project_id) references public.projects(id) on delete set null;
 alter table public.projects enable row level security;
 drop policy if exists "Owners manage own projects" on public.projects;
 create policy "Owners manage own projects" on public.projects
@@ -76,7 +79,7 @@ create policy "Owners manage own projects" on public.projects
 grant select, insert, update, delete on public.projects to authenticated;
 
 -- Project membership is email-based for this student MVP; only project owners
--- can manage the member list. Assignments do not grant access to private tasks.
+-- can manage the member list. Task visibility is granted to owners and explicit assignees.
 create table if not exists public.project_members (
   id uuid primary key default gen_random_uuid(),
   project_id uuid not null references public.projects(id) on delete cascade,
