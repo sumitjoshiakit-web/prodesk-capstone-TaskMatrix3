@@ -18,13 +18,15 @@ create index if not exists tasks_user_status_idx on public.tasks (user_id, statu
 alter table public.tasks enable row level security;
 
 drop policy if exists "Users can view own tasks" on public.tasks;
-create policy "Users can view own tasks" on public.tasks for select to authenticated using (auth.uid() = user_id);
+drop policy if exists "Owners and assignees can view tasks" on public.tasks;
+create policy "Owners and assignees can view tasks" on public.tasks for select to authenticated using (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, '')));
 
 drop policy if exists "Users can create own tasks" on public.tasks;
 create policy "Users can create own tasks" on public.tasks for insert to authenticated with check (auth.uid() = user_id);
 
 drop policy if exists "Users can update own tasks" on public.tasks;
-create policy "Users can update own tasks" on public.tasks for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Owners and assignees can update tasks" on public.tasks;
+create policy "Owners and assignees can update tasks" on public.tasks for update to authenticated using (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))) with check (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, '')));
 
 drop policy if exists "Users can delete own tasks" on public.tasks;
 create policy "Users can delete own tasks" on public.tasks for delete to authenticated using (auth.uid() = user_id);
@@ -93,8 +95,8 @@ alter table public.task_comments enable row level security;
 drop policy if exists "Task owners manage comments" on public.task_comments;
 create policy "Task owners manage comments" on public.task_comments
   for all to authenticated
-  using (exists (select 1 from public.tasks t where t.id = task_id and t.user_id = auth.uid()))
-  with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and t.user_id = auth.uid()));
+  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))))
+  with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
 grant select, insert, update, delete on public.task_comments to authenticated;
 
 create table if not exists public.task_activity (
