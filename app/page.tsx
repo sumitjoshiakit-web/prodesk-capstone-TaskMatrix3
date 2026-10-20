@@ -25,19 +25,29 @@ type Draft = {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string;
+  project_id: string;
+  assigned_to_email: string;
 };
+type Project = { id: string; owner_id: string; name: string; description: string; created_at: string };
+type Comment = { id: string; task_id: string; user_id: string; body: string; created_at: string };
+type Activity = { id: string; task_id: string; user_id: string; action: string; created_at: string };
 const blankDraft: Draft = {
   title: "",
   description: "",
-  status: "todo",
+  status: "backlog",
   priority: "Medium",
   due_date: "",
+  project_id: "",
+  assigned_to_email: "",
 };
 const statusLabel: Record<TaskStatus, string> = {
+  backlog: "Backlog",
   todo: "To do",
   in_progress: "In progress",
-  done: "Completed",
+  review: "Review",
+  done: "Done",
 };
+const boardStatuses: TaskStatus[] = ["backlog", "todo", "in_progress", "review", "done"];
 const formatDate = (value: string | null) =>
   value
     ? new Date(
@@ -59,6 +69,14 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [memberProjectId, setMemberProjectId] = useState("");
+  const [memberEmail, setMemberEmail] = useState("");
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
+  const [commentDraft, setCommentDraft] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<"create" | "edit" | "delete" | null>(null);
@@ -104,15 +122,23 @@ export default function Home() {
       if (!alive) return;
       setUser(data.session?.user ?? null);
       setReady(true);
-      if (data.session?.user) void loadTasks(data.session.user.id);
+      if (data.session?.user) {
+        void loadTasks(data.session.user.id);
+        void loadProjects(data.session.user.id);
+      }
     });
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!alive) return;
         const nextUser = session?.user ?? null;
         setUser(nextUser);
-        if (nextUser) void loadTasks(nextUser.id);
-        else setTasks([]);
+        if (nextUser) {
+          void loadTasks(nextUser.id);
+          void loadProjects(nextUser.id);
+        } else {
+          setTasks([]);
+          setProjects([]);
+        }
       },
     );
     return () => {
@@ -138,6 +164,16 @@ export default function Home() {
       setAuthMode(path === "/register" ? "signup" : "login");
     }
   }, [ready, user]);
+
+  const loadProjects = useCallback(async (userId: string) => {
+    if (!supabase) return;
+    const { data, error: projectError } = await supabase.from("projects").select("*").eq("owner_id", userId).order("created_at", { ascending: false });
+    if (projectError) {
+      setError(projectError.message.includes("relation") ? "Projects table missing. Run the updated supabase/schema.sql in Supabase SQL Editor." : projectError.message);
+      return;
+    }
+    setProjects((data ?? []) as Project[]);
+  }, [supabase]);
 
   const filteredTasks = useMemo(
     () =>
@@ -235,6 +271,8 @@ export default function Home() {
       status: task.status,
       priority: task.priority,
       due_date: task.due_date ?? "",
+      project_id: task.project_id ?? "",
+      assigned_to_email: task.assigned_to_email ?? "",
     });
     setError("");
     setModal("edit");
@@ -259,6 +297,8 @@ export default function Home() {
       status: draft.status,
       priority: draft.priority,
       due_date: draft.due_date || null,
+      project_id: draft.project_id || null,
+      assigned_to_email: draft.assigned_to_email.trim().toLowerCase() || null,
     };
     const result =
       modal === "edit" && selected
@@ -279,6 +319,7 @@ export default function Home() {
       setError(result.error.message);
       return;
     }
+    await supabase.from("task_activity").insert({ task_id: (result.data as Task).id, user_id: user.id, action: modal === "edit" ? `Updated task: ${title}` : `Created task: ${title}` });
     if (modal === "edit" && selected)
       setTasks((prev) =>
         prev.map((t) => (t.id === selected.id ? (result.data as Task) : t)),
@@ -307,6 +348,7 @@ export default function Home() {
       setError(deleteError.message);
       return;
     }
+    await supabase.from("task_activity").insert({ task_id: selected.id, user_id: user.id, action: `Deleted task: ${selected.title}` });
     setTasks((prev) => prev.filter((t) => t.id !== selected.id));
     setModal(null);
     setSelected(null);
@@ -326,6 +368,7 @@ export default function Home() {
       setError(updateError.message);
       return;
     }
+    await supabase.from("task_activity").insert({ task_id: task.id, user_id: user.id, action: `Moved task to ${statusLabel[nextStatus]}` });
     setTasks((prev) =>
       prev.map((t) => (t.id === task.id ? (data as Task) : t)),
     );
@@ -912,6 +955,17 @@ export default function Home() {
               Keep your next action small and achievable.
             </p>
           </article>
+        </section>
+        <section className="panel" id="projects">
+          <div className="panel-head"><div><h2>Projects &amp; team</h2><p>Group tasks into projects and keep track of collaborators by email.</p></div></div>
+          <form className="project-create" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !projectName.trim()) return; const { data, error: projectError } = await supabase.from("projects").insert({ owner_id: user.id, name: projectName.trim(), description: projectDescription.trim() }).select().single(); if (projectError) { setError(projectError.message); return; } setProjects((current) => [data as Project, ...current]); setProjectName(""); setProjectDescription(""); notify("Project created."); }}>
+            <div className="form-row"><div className="field"><label htmlFor="project-name">New project</label><input id="project-name" value={projectName} onChange={(event) => setProjectName(event.target.value)} maxLength={100} placeholder="e.g. Capstone delivery" required /></div><div className="field"><label htmlFor="project-description">Description</label><input id="project-description" value={projectDescription} onChange={(event) => setProjectDescription(event.target.value)} maxLength={500} placeholder="What is this project about?" /></div></div><button className="btn primary" type="submit">＋ Create project</button>
+          </form>
+          <div className="project-grid">{projects.length ? projects.map((project) => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon">▦</span><span className="badge">{tasks.filter((task) => task.project_id === project.id).length} tasks</span></div><h3>{project.name}</h3><p>{project.description || "No description added."}</p><form className="member-form" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !memberEmail.trim()) return; const { error: memberError } = await supabase.from("project_members").insert({ project_id: project.id, owner_id: user.id, member_email: memberEmail.trim().toLowerCase() }); if (memberError) setError(memberError.code === "23505" ? "This email is already on the project." : memberError.message); else { setMemberEmail(""); setMemberProjectId(project.id); notify("Team member added to project."); } }}><label htmlFor={"member-" + project.id}>Add team member email</label><div className="member-input-row"><input id={"member-" + project.id} type="email" value={memberProjectId === project.id ? memberEmail : ""} onFocus={() => setMemberProjectId(project.id)} onChange={(event) => { setMemberProjectId(project.id); setMemberEmail(event.target.value); }} placeholder="teammate@example.com" required /><button className="btn small" type="submit">Add</button></div></form><button className="text-link project-delete" type="button" onClick={async () => { if (!supabase || !user || !window.confirm("Delete this project? Tasks will remain but become unassigned to a project.")) return; const { error: deleteProjectError } = await supabase.from("projects").delete().eq("id", project.id).eq("owner_id", user.id); if (deleteProjectError) setError(deleteProjectError.message); else { setProjects((current) => current.filter((item) => item.id !== project.id)); setTasks((current) => current.map((task) => task.project_id === project.id ? { ...task, project_id: null } : task)); notify("Project deleted."); } }}>Delete project</button></article>) : <div className="empty"><h3>No projects yet</h3><p>Create a project to group related tasks and add team emails.</p></div>}</div>
+        </section>
+        <section className="panel" id="board">
+          <div className="panel-head"><div><h2>Kanban board</h2><p>Move work across the five PRD stages.</p></div><span className="badge">{tasks.length} total</span></div>
+          <div className="kanban-board">{boardStatuses.map((status) => <section className="kanban-column" key={status}><div className="kanban-heading"><h3>{statusLabel[status]}</h3><span>{filteredTasks.filter((task) => task.status === status).length}</span></div>{filteredTasks.filter((task) => task.status === status).map((task) => <article className="kanban-card" key={task.id}><strong>{task.title}</strong><p>{task.description || "No description"}</p>{task.project_id && <small>Project: {projects.find((project) => project.id === task.project_id)?.name ?? "Project"}</small>}{task.assigned_to_email && <small>Assigned: {task.assigned_to_email}</small>}<div className="kanban-actions"><button className="btn small" disabled={status === "backlog"} onClick={() => void moveTask(task, boardStatuses[boardStatuses.indexOf(status) - 1])}>←</button><button className="btn small" disabled={status === "done"} onClick={() => void moveTask(task, boardStatuses[boardStatuses.indexOf(status) + 1])}>→</button><button className="btn small" onClick={() => void openTaskDiscussion(task)}>Comments / history</button></div></article>)}</section>)}</div>
         </section>
         <section className="panel" id="tasks">
           <div className="panel-head" style={{ marginBottom: 16 }}>
