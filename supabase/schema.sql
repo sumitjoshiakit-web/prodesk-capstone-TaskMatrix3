@@ -50,10 +50,7 @@ create policy "Owners and assignees can update tasks" on public.tasks
   )
   with check (
     auth.uid() = user_id
-    or (
-      lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))
-      and user_id = (select t.user_id from public.tasks t where t.id = id)
-    )
+    or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))
   );
 
 drop policy if exists "Users can delete own tasks" on public.tasks;
@@ -164,11 +161,15 @@ create table if not exists public.task_comments (
 create index if not exists task_comments_task_created_idx on public.task_comments(task_id, created_at);
 alter table public.task_comments enable row level security;
 drop policy if exists "Task owners manage comments" on public.task_comments;
-create policy "Task owners manage comments" on public.task_comments
-  for all to authenticated
-  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))))
+drop policy if exists "Task participants read comments" on public.task_comments;
+drop policy if exists "Signed-in participants add comments" on public.task_comments;
+create policy "Task participants read comments" on public.task_comments
+  for select to authenticated
+  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
+create policy "Signed-in participants add comments" on public.task_comments
+  for insert to authenticated
   with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
-grant select, insert, update, delete on public.task_comments to authenticated;
+grant select, insert on public.task_comments to authenticated;
 
 create table if not exists public.task_activity (
   id uuid primary key default gen_random_uuid(),
@@ -180,8 +181,12 @@ create table if not exists public.task_activity (
 create index if not exists task_activity_task_created_idx on public.task_activity(task_id, created_at desc);
 alter table public.task_activity enable row level security;
 drop policy if exists "Task owners manage activity" on public.task_activity;
-create policy "Task owners manage activity" on public.task_activity
-  for all to authenticated
-  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))))
+drop policy if exists "Task participants read activity" on public.task_activity;
+drop policy if exists "Signed-in participants add activity" on public.task_activity;
+create policy "Task participants read activity" on public.task_activity
+  for select to authenticated
+  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
+create policy "Signed-in participants add activity" on public.task_activity
+  for insert to authenticated
   with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
-grant select, insert, update, delete on public.task_activity to authenticated;
+grant select, insert on public.task_activity to authenticated;
