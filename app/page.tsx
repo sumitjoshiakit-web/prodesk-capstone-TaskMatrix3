@@ -1120,18 +1120,20 @@ export default function Home() {
                       >
                         ✎
                       </button>
-                      <button
-                        className="icon-btn"
-                        onClick={() => {
-                          setSelected(task);
-                          setError("");
-                          setModal("delete");
-                        }}
-                        aria-label={"Delete " + task.title}
-                        title="Delete task"
-                      >
-                        ⌫
-                      </button>
+                      {task.user_id === user.id && (
+                        <button
+                          className="icon-btn"
+                          onClick={() => {
+                            setSelected(task);
+                            setError("");
+                            setModal("delete");
+                          }}
+                          aria-label={"Delete " + task.title}
+                          title="Delete task"
+                        >
+                          ⌫
+                        </button>
+                      )}
                     </div>
                   </div>
                 </article>
