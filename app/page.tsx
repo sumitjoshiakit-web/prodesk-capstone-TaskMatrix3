@@ -726,11 +726,14 @@ export default function Home() {
           <a className="side-item active" href="/dashboard">
             <span aria-hidden="true">▦</span> Overview
           </a>
+          <a className="side-item muted" href="/dashboard#projects">
+            <span aria-hidden="true">▧</span> Projects &amp; team
+          </a>
+          <a className="side-item muted" href="/dashboard#board">
+            <span aria-hidden="true">▥</span> Kanban board
+          </a>
           <a className="side-item muted" href="/dashboard#tasks">
             <span aria-hidden="true">✓</span> My tasks
-          </a>
-          <a className="side-item muted" href="/dashboard#activity">
-            <span aria-hidden="true">◷</span> Activity
           </a>
         </nav>
         <div className="top-actions">
