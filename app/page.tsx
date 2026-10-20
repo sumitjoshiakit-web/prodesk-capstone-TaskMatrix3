@@ -16,7 +16,7 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
+import { useAuthStore } from "@/lib/auth-store";
 
 type Filter = "all" | TaskStatus;
 type Draft = {
@@ -51,7 +51,8 @@ const formatDate = (value: string | null) =>
 
 export default function Home() {
   const supabase = useMemo(() => getSupabase(), []);
-  const [user, setUser] = useState<User | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
   const [ready, setReady] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
