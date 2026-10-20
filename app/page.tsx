@@ -31,6 +31,7 @@ type Draft = {
 type Project = { id: string; owner_id: string; name: string; description: string; created_at: string };
 type Comment = { id: string; task_id: string; user_id: string; body: string; created_at: string };
 type Activity = { id: string; task_id: string; user_id: string; action: string; created_at: string };
+type ProjectMember = { id: string; project_id: string; owner_id: string; member_email: string; created_at: string };
 const blankDraft: Draft = {
   title: "",
   description: "",
@@ -70,6 +71,7 @@ export default function Home() {
   const [fullName, setFullName] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [memberProjectId, setMemberProjectId] = useState("");
@@ -92,11 +94,10 @@ export default function Home() {
     async (userId: string) => {
       if (!supabase) return;
       setLoadingTasks(true);
-      const { data, error: queryError } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+      const ownResult = await supabase.from("tasks").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+      const assignedResult = user?.email ? await supabase.from("tasks").select("*").eq("assigned_to_email", user.email.toLowerCase()).neq("user_id", userId).order("created_at", { ascending: false }) : { data: [], error: null };
+      const queryError = ownResult.error ?? assignedResult.error;
+      const combinedTasks = [...(ownResult.data ?? []), ...(assignedResult.data ?? [])].filter((task, index, all) => all.findIndex((candidate) => candidate.id === task.id) === index);
       if (queryError)
         setError(
           queryError.message.includes("relation")
@@ -104,12 +105,12 @@ export default function Home() {
             : queryError.message,
         );
       else {
-        setTasks((data ?? []) as Task[]);
+        setTasks(combinedTasks as Task[]);
         setError("");
       }
       setLoadingTasks(false);
     },
-    [supabase],
+    [supabase, user?.email],
   );
 
   useEffect(() => {
@@ -173,6 +174,8 @@ export default function Home() {
       return;
     }
     setProjects((data ?? []) as Project[]);
+    const { data: memberRows, error: memberError } = await supabase.from("project_members").select("*").eq("owner_id", userId).order("created_at", { ascending: true });
+    if (memberError) setError(memberError.message); else setMembers((memberRows ?? []) as ProjectMember[]);
   }, [supabase]);
 
   const filteredTasks = useMemo(
@@ -341,8 +344,7 @@ export default function Home() {
     const { error: deleteError } = await supabase
       .from("tasks")
       .delete()
-      .eq("id", selected.id)
-      .eq("user_id", user.id);
+      .eq("id", selected.id);
     setBusy(false);
     if (deleteError) {
       setError(deleteError.message);
@@ -361,7 +363,6 @@ export default function Home() {
       .from("tasks")
       .update({ status: nextStatus })
       .eq("id", task.id)
-      .eq("user_id", user.id)
       .select()
       .single();
     if (updateError) {
@@ -381,7 +382,7 @@ export default function Home() {
 
   async function moveTask(task: Task, nextStatus: TaskStatus) {
     if (!supabase || !user) return;
-    const { data, error: updateError } = await supabase.from("tasks").update({ status: nextStatus }).eq("id", task.id).eq("user_id", user.id).select().single();
+    const { data, error: updateError } = await supabase.from("tasks").update({ status: nextStatus }).eq("id", task.id).select().single();
     if (updateError) { setError(updateError.message); return; }
     await supabase.from("task_activity").insert({ task_id: task.id, user_id: user.id, action: `Moved task to ${statusLabel[nextStatus]}` });
     setTasks((current) => current.map((item) => item.id === task.id ? data as Task : item));
@@ -990,7 +991,7 @@ export default function Home() {
           <form className="project-create" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !projectName.trim()) return; const { data, error: projectError } = await supabase.from("projects").insert({ owner_id: user.id, name: projectName.trim(), description: projectDescription.trim() }).select().single(); if (projectError) { setError(projectError.message); return; } setProjects((current) => [data as Project, ...current]); setProjectName(""); setProjectDescription(""); notify("Project created."); }}>
             <div className="form-row"><div className="field"><label htmlFor="project-name">New project</label><input id="project-name" value={projectName} onChange={(event) => setProjectName(event.target.value)} maxLength={100} placeholder="e.g. Capstone delivery" required /></div><div className="field"><label htmlFor="project-description">Description</label><input id="project-description" value={projectDescription} onChange={(event) => setProjectDescription(event.target.value)} maxLength={500} placeholder="What is this project about?" /></div></div><button className="btn primary" type="submit">＋ Create project</button>
           </form>
-          <div className="project-grid">{projects.length ? projects.map((project) => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon">▦</span><span className="badge">{tasks.filter((task) => task.project_id === project.id).length} tasks</span></div><h3>{project.name}</h3><p>{project.description || "No description added."}</p><form className="member-form" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !memberEmail.trim()) return; const { error: memberError } = await supabase.from("project_members").insert({ project_id: project.id, owner_id: user.id, member_email: memberEmail.trim().toLowerCase() }); if (memberError) setError(memberError.code === "23505" ? "This email is already on the project." : memberError.message); else { setMemberEmail(""); setMemberProjectId(project.id); notify("Team member added to project."); } }}><label htmlFor={"member-" + project.id}>Add team member email</label><div className="member-input-row"><input id={"member-" + project.id} type="email" value={memberProjectId === project.id ? memberEmail : ""} onFocus={() => setMemberProjectId(project.id)} onChange={(event) => { setMemberProjectId(project.id); setMemberEmail(event.target.value); }} placeholder="teammate@example.com" required /><button className="btn small" type="submit">Add</button></div></form><button className="text-link project-delete" type="button" onClick={async () => { if (!supabase || !user || !window.confirm("Delete this project? Tasks will remain but become unassigned to a project.")) return; const { error: deleteProjectError } = await supabase.from("projects").delete().eq("id", project.id).eq("owner_id", user.id); if (deleteProjectError) setError(deleteProjectError.message); else { setProjects((current) => current.filter((item) => item.id !== project.id)); setTasks((current) => current.map((task) => task.project_id === project.id ? { ...task, project_id: null } : task)); notify("Project deleted."); } }}>Delete project</button></article>) : <div className="empty"><h3>No projects yet</h3><p>Create a project to group related tasks and add team emails.</p></div>}</div>
+          <div className="project-grid">{projects.length ? projects.map((project) => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon">▦</span><span className="badge">{tasks.filter((task) => task.project_id === project.id).length} tasks</span></div><h3>{project.name}</h3><p>{project.description || "No description added."}</p><form className="member-form" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !memberEmail.trim()) return; const { data: newMember, error: memberError } = await supabase.from("project_members").insert({ project_id: project.id, owner_id: user.id, member_email: memberEmail.trim().toLowerCase() }).select().single(); if (memberError) setError(memberError.code === "23505" ? "This email is already on the project." : memberError.message); else { setMembers((current) => [...current, newMember as ProjectMember]); setMemberEmail(""); setMemberProjectId(project.id); notify("Team member added to project."); } }}><label htmlFor={"member-" + project.id}>Add team member email</label><div className="member-input-row"><input id={"member-" + project.id} type="email" value={memberProjectId === project.id ? memberEmail : ""} onFocus={() => setMemberProjectId(project.id)} onChange={(event) => { setMemberProjectId(project.id); setMemberEmail(event.target.value); }} placeholder="teammate@example.com" required /><button className="btn small" type="submit">Add</button></div></form><div className="member-list"><strong>Team</strong>{members.filter((member) => member.project_id === project.id).length ? members.filter((member) => member.project_id === project.id).map((member) => <span className="member-chip" key={member.id}>{member.member_email}<button type="button" aria-label={"Remove " + member.member_email} onClick={async () => { if (!supabase || !user) return; const { error: removeError } = await supabase.from("project_members").delete().eq("id", member.id).eq("owner_id", user.id); if (removeError) setError(removeError.message); else setMembers((current) => current.filter((item) => item.id !== member.id)); }}>×</button></span>) : <small>No members added yet.</small>}</div><button className="text-link project-delete" type="button" onClick={async () => { if (!supabase || !user || !window.confirm("Delete this project? Tasks will remain but become unassigned to a project.")) return; const { error: deleteProjectError } = await supabase.from("projects").delete().eq("id", project.id).eq("owner_id", user.id); if (deleteProjectError) setError(deleteProjectError.message); else { setProjects((current) => current.filter((item) => item.id !== project.id)); setMembers((current) => current.filter((member) => member.project_id !== project.id)); setTasks((current) => current.map((task) => task.project_id === project.id ? { ...task, project_id: null } : task)); notify("Project deleted."); } }}>Delete project</button></article>) : <div className="empty"><h3>No projects yet</h3><p>Create a project to group related tasks and add team emails.</p></div>}</div>
         </section>
         <section className="panel" id="board">
           <div className="panel-head"><div><h2>Kanban board</h2><p>Move work across the five PRD stages.</p></div><span className="badge">{tasks.length} total</span></div>
