@@ -11,7 +11,7 @@ export function getSupabase() {
   return browserClient;
 }
 
-export type TaskStatus = "todo" | "in_progress" | "done";
+export type TaskStatus = "backlog" | "todo" | "in_progress" | "review" | "done";
 export type TaskPriority = "Low" | "Medium" | "High";
 export type Task = {
   id: string;
@@ -21,6 +21,8 @@ export type Task = {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  project_id: string | null;
+  assigned_to_email: string | null;
   created_at: string;
   updated_at: string;
 };
