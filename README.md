@@ -1,6 +1,6 @@
 # TaskMatrix — Sprint 15
 
-Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authentication foundation. The implementation uses Next.js App Router, Supabase Auth/Postgres, user-scoped task CRUD, and Recharts analytics.
+Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authentication foundation. The implementation uses Next.js App Router, Supabase Auth/Postgres, project management, a five-stage Kanban board, task assignment by email, task comments, activity history, task CRUD, and Recharts analytics.
 
 **Related project records**
 - Sprint 13 planning / PRD / wireframes: [prodesk-capstone-TaskMatrix1](https://github.com/sumitjoshiakit-web/prodesk-capstone-TaskMatrix1)
@@ -22,17 +22,18 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 ### PRD alignment and known scope changes
 
-The Sprint 13 PRD proposed projects, a five-column board (Backlog, To Do, In Progress, Review, Done), team membership, task assignments, comments, and activity history. The Sprint 15 implementation currently delivers a user-owned task list with three statuses (To do, In progress, Completed), priority, due date, search/filtering, CRUD, and dashboard metrics. Projects, the five-column board, team members/assignees, comments, and activity history are **not implemented**. This is an explicit scope reduction from the planning PRD, not a claim that every PRD feature is complete.
+The Sprint 15 implementation now includes projects, a five-stage board (Backlog, To Do, In Progress, Review, Done), email-based project member records, task assignees, task comments, and an activity feed alongside task CRUD and analytics. Project owners manage their project/member lists; a task's assigned email can sign in to view/update that task and participate in its discussion through RLS policies. Project membership by itself does not grant access to every task in that project; assign tasks explicitly to collaborators. The app still uses a single client page and needs final build, live Supabase/RLS, and deployment verification.
 
 Sprint 15 now restores the Sprint 14 Zustand auth store for the authenticated user payload. Task data, filters, and modal state remain local to the main client page; the large page still needs a component-level refactor.
 
 
-- Read: hydrate the signed-in user's tasks from Supabase.
-- Create: validate and persist new tasks.
-- Update: edit existing tasks in a prefilled dialog.
-- Delete: require confirmation before deleting a task.
+- Projects: create and delete projects; add/remove team member email records.
+- Board: move tasks through Backlog, To Do, In Progress, Review, and Done.
+- Assignment: assign tasks by email; signed-in assignees can access assigned tasks under RLS.
+- Collaboration: persist task comments and activity history.
+- CRUD: create, read, edit, complete, filter, search, and confirm deletion of tasks.
 - Analytics: task status summary and completion chart.
-- Security: Supabase Row Level Security (RLS) ensures each user can access only their own records.
+- Security: Supabase Row Level Security (RLS) scopes tasks to owners and explicit assignees.
 
 ## Stack
 
@@ -49,7 +50,7 @@ The Sprint 13 planning document initially proposed React/Vite + Express + MongoD
 1. Install Node.js 20+.
 2. Run `npm install`.
 3. Copy `.env.example` to `.env.local` and add your Supabase project URL and anon/publishable key.
-4. Run the SQL in `supabase/schema.sql` in Supabase SQL Editor.
+4. Run the full updated SQL in `supabase/schema.sql` in Supabase SQL Editor. It extends the existing tasks schema and creates projects, project members, comments, and activity tables.
 5. Run `npm run dev` and open `http://localhost:3000`.
 
 ## Environment
@@ -65,7 +66,7 @@ Use this checklist during final manual verification; do not mark a check complet
 - [ ] Create, edit, complete, filter, and delete a task.
 - [ ] Confirm refresh retains data and a second user cannot see the first user's tasks.
 - [ ] Verify dashboard metrics update after mutations.
-- [ ] Run `npm run build` and the repository's lint command on the final commit.
+- [ ] Confirm the GitHub Actions `Sprint 15 validation` workflow passes lint and production build on the final commit.
 - [ ] Deploy to Vercel, add environment variables, configure Supabase Auth Site URL/redirect URLs, and verify the live site.
 - [ ] Add the verified Vercel URL to this README.
 - [ ] Confirm the Figma link is accessible to reviewers without requesting access.
@@ -74,4 +75,4 @@ Use this checklist during final manual verification; do not mark a check complet
 
 - [x] Restore the Sprint 14 Zustand auth-store integration for the current user payload.
 - [ ] Split the large client page into focused components (for example, `AuthForm`, `TaskTable`, `TaskModal`, and `Charts`) without changing behavior.
-- [ ] Decide whether to add projects and a project-to-tasks relationship, or retain the reduced task-only scope and get the PRD/README accepted as a documented change.
+- [ ] Run the updated SQL in the connected Supabase project and verify owner/assignee access with two test accounts.
