@@ -9,9 +9,17 @@ create table if not exists public.tasks (
   status text not null default 'todo' check (status in ('todo', 'in_progress', 'done')),
   priority text not null default 'Medium' check (priority in ('Low', 'Medium', 'High')),
   due_date date,
+  project_id uuid,
+  assigned_to_email text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Ensure columns and workflow stages exist before policies reference them.
+alter table public.tasks add column if not exists project_id uuid;
+alter table public.tasks add column if not exists assigned_to_email text;
+alter table public.tasks drop constraint if exists tasks_status_check;
+alter table public.tasks add constraint tasks_status_check check (status in ('backlog', 'todo', 'in_progress', 'review', 'done'));
 
 create index if not exists tasks_user_created_idx on public.tasks (user_id, created_at desc);
 create index if not exists tasks_user_status_idx on public.tasks (user_id, status);
