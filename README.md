@@ -1,6 +1,13 @@
 # TaskMatrix — Sprint 15
 
-Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authentication foundation. It keeps the Next.js App Router, Supabase Auth, responsive purple-and-white workspace UI, and adds authenticated task CRUD and analytics.
+Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authentication foundation. The implementation uses Next.js App Router, Supabase Auth/Postgres, user-scoped task CRUD, and Recharts analytics.
+
+**Related project records**
+- Sprint 13 planning / PRD / wireframes: [prodesk-capstone-TaskMatrix1](https://github.com/sumitjoshiakit-web/prodesk-capstone-TaskMatrix1)
+- Sprint 14 authentication foundation: [prodesk-capstone--TaskMatrix-2](https://github.com/sumitjoshiakit-web/prodesk-capstone--TaskMatrix-2)
+- Sprint 13 Figma wireframes: [TaskMatrix Figma file](https://www.figma.com/design/PMAHqdULAMywdVpkL8mq2k/Untitled?node-id=0-1)
+
+**Deployment status:** No verified public deployment URL is recorded here yet. Do not treat the project as deployment-verified until the Vercel URL, environment variables, and Supabase Auth redirect URLs have been checked.
 
 ## Routes
 
@@ -13,6 +20,13 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 ## Sprint 15 scope
 
+### PRD alignment and known scope changes
+
+The Sprint 13 PRD proposed projects, a five-column board (Backlog, To Do, In Progress, Review, Done), team membership, task assignments, comments, and activity history. The Sprint 15 implementation currently delivers a user-owned task list with three statuses (To do, In progress, Completed), priority, due date, search/filtering, CRUD, and dashboard metrics. Projects, the five-column board, team members/assignees, comments, and activity history are **not implemented**. This is an explicit scope reduction from the planning PRD, not a claim that every PRD feature is complete.
+
+Sprint 14 introduced a Zustand auth store. Sprint 15 currently manages auth/task state with component-local React state and does not hydrate the Sprint 14 Zustand store. This is an architecture continuity gap to address before calling the full capstone architecture-complete.
+
+
 - Read: hydrate the signed-in user's tasks from Supabase.
 - Create: validate and persist new tasks.
 - Update: edit existing tasks in a prefilled dialog.
@@ -21,6 +35,8 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 - Security: Supabase Row Level Security (RLS) ensures each user can access only their own records.
 
 ## Stack
+
+The Sprint 13 planning document initially proposed React/Vite + Express + MongoDB. Implementation deliberately changed in Sprint 14 to Next.js + Supabase; Sprint 15 continues that revised architecture. The Sprint 13 README documents this evolution.
 
 - Next.js App Router, React, TypeScript
 - Supabase Auth + Postgres (`@supabase/ssr` session cookies)
@@ -42,9 +58,20 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 ## Validation checklist
 
-- Register/sign in with Supabase Auth.
-- Create, edit, complete, filter, and delete a task.
-- Confirm refresh retains data and a second user cannot see the first user's tasks.
-- Verify dashboard metrics update after mutations.
+Use this checklist during final manual verification; do not mark a check complete until it has been tested against the current commit.
 
-> Deployment note: configure the same public environment variables in Vercel and set the Supabase Auth Site URL / redirect URLs to your deployment domain.
+- [ ] Register/sign in with Supabase Auth.
+- [ ] Confirm signed-out access to `/dashboard` redirects to `/login`.
+- [ ] Create, edit, complete, filter, and delete a task.
+- [ ] Confirm refresh retains data and a second user cannot see the first user's tasks.
+- [ ] Verify dashboard metrics update after mutations.
+- [ ] Run `npm run build` and the repository's lint command on the final commit.
+- [ ] Deploy to Vercel, add environment variables, configure Supabase Auth Site URL/redirect URLs, and verify the live site.
+- [ ] Add the verified Vercel URL to this README.
+- [ ] Confirm the Figma link is accessible to reviewers without requesting access.
+
+## Architecture follow-up before capstone-wide submission
+
+- [ ] Restore or deliberately replace the Sprint 14 Zustand auth-store integration.
+- [ ] Split the large client page into focused components (for example, `AuthForm`, `TaskTable`, `TaskModal`, and `Charts`) without changing behavior.
+- [ ] Decide whether to add projects and a project-to-tasks relationship, or retain the reduced task-only scope and get the PRD/README accepted as a documented change.
