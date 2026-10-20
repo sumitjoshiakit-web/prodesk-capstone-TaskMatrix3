@@ -148,7 +148,12 @@ create table if not exists public.project_members (
 alter table public.project_members enable row level security;
 drop policy if exists "Owners manage project members" on public.project_members;
 create policy "Owners manage project members" on public.project_members
-  for all to authenticated using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+  for all to authenticated
+  using (auth.uid() = owner_id)
+  with check (
+    auth.uid() = owner_id
+    and exists (select 1 from public.projects p where p.id = project_id and p.owner_id = auth.uid())
+  );
 grant select, insert, update, delete on public.project_members to authenticated;
 
 create table if not exists public.task_comments (
