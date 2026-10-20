@@ -30,11 +30,31 @@ drop policy if exists "Owners and assignees can view tasks" on public.tasks;
 create policy "Owners and assignees can view tasks" on public.tasks for select to authenticated using (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, '')));
 
 drop policy if exists "Users can create own tasks" on public.tasks;
-create policy "Users can create own tasks" on public.tasks for insert to authenticated with check (auth.uid() = user_id);
+create policy "Users can create own tasks" on public.tasks
+  for insert to authenticated
+  with check (
+    auth.uid() = user_id
+    and (project_id is null or exists (
+      select 1 from public.projects p
+      where p.id = project_id and p.owner_id = auth.uid()
+    ))
+  );
 
 drop policy if exists "Users can update own tasks" on public.tasks;
 drop policy if exists "Owners and assignees can update tasks" on public.tasks;
-create policy "Owners and assignees can update tasks" on public.tasks for update to authenticated using (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))) with check (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, '')));
+create policy "Owners and assignees can update tasks" on public.tasks
+  for update to authenticated
+  using (
+    auth.uid() = user_id
+    or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))
+  )
+  with check (
+    auth.uid() = user_id
+    or (
+      lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, ''))
+      and user_id = (select t.user_id from public.tasks t where t.id = id)
+    )
+  );
 
 drop policy if exists "Users can delete own tasks" on public.tasks;
 create policy "Users can delete own tasks" on public.tasks for delete to authenticated using (auth.uid() = user_id);
@@ -55,11 +75,6 @@ grant select, insert, update, delete on public.tasks to authenticated;
 
 -- Sprint 15 PRD expansion: projects, five-stage workflow, team assignment,
 -- task comments, and an audit-friendly activity feed.
-alter table public.tasks add column if not exists project_id uuid;
-alter table public.tasks add column if not exists assigned_to_email text;
-alter table public.tasks drop constraint if exists tasks_status_check;
-alter table public.tasks add constraint tasks_status_check
-  check (status in ('backlog', 'todo', 'in_progress', 'review', 'done'));
 
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
@@ -72,6 +87,51 @@ create index if not exists projects_owner_created_idx on public.projects(owner_i
 update public.tasks t set project_id = null where t.project_id is not null and not exists (select 1 from public.projects p where p.id = t.project_id);
 alter table public.tasks drop constraint if exists tasks_project_id_fkey;
 alter table public.tasks add constraint tasks_project_id_fkey foreign key (project_id) references public.projects(id) on delete set null;
+
+-- Keep task ownership and project boundaries safe in the database, not only in the UI.
+create or replace function public.enforce_task_write_rules()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $
+declare
+  current_email text := lower(coalesce(auth.jwt() ->> 'email', ''));
+  is_owner boolean;
+begin
+  if new.project_id is not null then
+    select exists (
+      select 1 from public.projects p
+      where p.id = new.project_id and p.owner_id = new.user_id
+    ) into is_owner;
+    if not is_owner then
+      raise exception 'Tasks can only be linked to a project owned by the task owner.';
+    end if;
+  end if;
+
+  if tg_op = 'UPDATE' and auth.uid() <> old.user_id then
+    if current_email = '' or current_email <> lower(coalesce(old.assigned_to_email, '')) then
+      raise exception 'Only the task owner or assigned user can update this task.';
+    end if;
+    if new.user_id is distinct from old.user_id
+      or new.title is distinct from old.title
+      or new.description is distinct from old.description
+      or new.priority is distinct from old.priority
+      or new.due_date is distinct from old.due_date
+      or new.project_id is distinct from old.project_id
+      or new.assigned_to_email is distinct from old.assigned_to_email
+      or new.created_at is distinct from old.created_at then
+      raise exception 'Assigned users may update task status only.';
+    end if;
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists enforce_task_write_rules on public.tasks;
+create trigger enforce_task_write_rules
+before insert or update on public.tasks
+for each row execute function public.enforce_task_write_rules();
 alter table public.projects enable row level security;
 drop policy if exists "Owners manage own projects" on public.projects;
 create policy "Owners manage own projects" on public.projects
