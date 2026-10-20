@@ -111,6 +111,6 @@ alter table public.task_activity enable row level security;
 drop policy if exists "Task owners manage activity" on public.task_activity;
 create policy "Task owners manage activity" on public.task_activity
   for all to authenticated
-  using (exists (select 1 from public.tasks t where t.id = task_id and t.user_id = auth.uid()))
-  with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and t.user_id = auth.uid()));
+  using (exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))))
+  with check (user_id = auth.uid() and exists (select 1 from public.tasks t where t.id = task_id and (t.user_id = auth.uid() or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(t.assigned_to_email, '')))));
 grant select, insert, update, delete on public.task_activity to authenticated;
