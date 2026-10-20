@@ -18,6 +18,7 @@ import {
 } from "@/lib/supabase";
 import { useAuthStore } from "@/lib/auth-store";
 import ProjectCard, { type Project, type ProjectMember } from "@/components/ProjectCard";
+import TaskBoard from "@/components/TaskBoard";
 
 type Filter = "all" | TaskStatus;
 type Draft = {
@@ -47,7 +48,6 @@ const statusLabel: Record<TaskStatus, string> = {
   review: "Review",
   done: "Done",
 };
-const boardStatuses: TaskStatus[] = ["backlog", "todo", "in_progress", "review", "done"];
 const formatDate = (value: string | null) =>
   value
     ? new Date(
@@ -1073,10 +1073,12 @@ export default function Home() {
             )}
           </div>
         </section>
-        <section className="panel" id="board">
-          <div className="panel-head"><div><h2>Kanban board</h2><p>Move work across the five PRD stages.</p></div><span className="badge">{tasks.length} total</span></div>
-          <div className="kanban-board">{boardStatuses.map((status) => <section className="kanban-column" key={status}><div className="kanban-heading"><h3>{statusLabel[status]}</h3><span>{filteredTasks.filter((task) => task.status === status).length}</span></div>{filteredTasks.filter((task) => task.status === status).map((task) => <article className="kanban-card" key={task.id}><strong>{task.title}</strong><p>{task.description || "No description"}</p>{task.project_id && <small>Project: {projects.find((project) => project.id === task.project_id)?.name ?? "Project"}</small>}{task.assigned_to_email && <small>Assigned: {task.assigned_to_email}</small>}<div className="kanban-actions"><button className="btn small" disabled={status === "backlog"} onClick={() => void moveTask(task, boardStatuses[boardStatuses.indexOf(status) - 1])}>←</button><button className="btn small" disabled={status === "done"} onClick={() => void moveTask(task, boardStatuses[boardStatuses.indexOf(status) + 1])}>→</button><button className="btn small" onClick={() => void openTaskDiscussion(task)}>Comments / history</button></div></article>)}</section>)}</div>
-        </section>
+        <TaskBoard
+          tasks={filteredTasks}
+          projects={projects}
+          onMoveTask={(task, nextStatus) => void moveTask(task, nextStatus)}
+          onOpenDiscussion={(task) => void openTaskDiscussion(task)}
+        />
         <section className="panel" id="tasks">
           <div className="panel-head" style={{ marginBottom: 16 }}>
             <div>
