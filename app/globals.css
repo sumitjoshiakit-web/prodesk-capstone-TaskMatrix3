@@ -1592,3 +1592,42 @@ body {
     display: none;
   }
 }
+
+
+/* Sprint 15 PRD features: projects, Kanban, team assignments and discussion. */
+.project-create { display: grid; gap: 10px; margin-bottom: 22px; }
+.project-create .form-row { align-items: end; }
+.project-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.project-card { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+.project-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.project-icon { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 10px; color: var(--green); background: var(--mint); }
+.project-card h3 { margin: 15px 0 6px; font: 700 15px Manrope, sans-serif; overflow-wrap: anywhere; }
+.project-card > p { min-height: 34px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.member-form { margin-top: 18px; display: grid; gap: 8px; }
+.member-form label { font-size: 11px; font-weight: 700; color: var(--muted); }
+.member-input-row { display: flex; gap: 6px; }
+.member-input-row input { min-width: 0; width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 9px; font-size: 11px; }
+.project-delete { margin-top: 15px; color: var(--red); }
+.kanban-board { display: grid; grid-template-columns: repeat(5, minmax(180px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.kanban-column { min-width: 180px; padding: 10px; border-radius: 12px; background: #f4f5f9; }
+.kanban-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 3px 12px; }
+.kanban-heading h3 { margin: 0; font: 700 12px Manrope, sans-serif; }
+.kanban-heading span { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 7px; background: white; color: var(--muted); font-size: 11px; }
+.kanban-card { padding: 12px; margin-bottom: 9px; border: 1px solid var(--line); border-radius: 10px; background: white; box-shadow: 0 2px 4px #142a1708; }
+.kanban-card strong { display: block; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.kanban-card p { margin: 7px 0; color: var(--muted); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.kanban-card small { display: block; margin-top: 6px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+.kanban-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.kanban-actions .btn { padding: 6px 8px; font-size: 10px; }
+.discussion-list { display: grid; gap: 10px; max-height: 220px; overflow: auto; margin-bottom: 18px; }
+.discussion-item { padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfbfe; }
+.discussion-item p { margin: 0 0 8px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.discussion-item small, .activity-entry small { color: var(--muted); font-size: 10px; }
+.comment-form { border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.activity-feed { margin-top: 18px; }
+.activity-feed h3 { margin: 0 0 12px; font: 700 14px Manrope, sans-serif; }
+.activity-entry { display: flex; gap: 10px; padding: 9px 0; }
+.activity-dot { flex: 0 0 8px; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--green); }
+.activity-entry p { margin: 0 0 4px; font-size: 12px; }
+@media (max-width: 1000px) { .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .project-grid { grid-template-columns: 1fr; } .project-create .form-row { grid-template-columns: 1fr; } }
