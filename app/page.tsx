@@ -17,6 +17,7 @@ import {
   type TaskStatus,
 } from "@/lib/supabase";
 import { useAuthStore } from "@/lib/auth-store";
+import ProjectCard, { type Project, type ProjectMember } from "@/components/ProjectCard";
 
 type Filter = "all" | TaskStatus;
 type Draft = {
@@ -28,10 +29,8 @@ type Draft = {
   project_id: string;
   assigned_to_email: string;
 };
-type Project = { id: string; owner_id: string; name: string; description: string; created_at: string };
 type Comment = { id: string; task_id: string; user_id: string; body: string; created_at: string };
 type Activity = { id: string; task_id: string; user_id: string; action: string; created_at: string };
-type ProjectMember = { id: string; project_id: string; owner_id: string; member_email: string; created_at: string };
 const blankDraft: Draft = {
   title: "",
   description: "",
@@ -409,6 +408,59 @@ export default function Home() {
     setComments((current) => [...current, data as Comment]); setCommentDraft("");
     const { data: activityRows } = await supabase.from("task_activity").select("*").eq("task_id", selected.id).order("created_at", { ascending: false });
     setActivity((activityRows ?? []) as Activity[]);
+  }
+
+  async function addProjectMember(event: FormEvent<HTMLFormElement>, project: Project) {
+    event.preventDefault();
+    if (!supabase || !user || !memberEmail.trim()) return;
+    const { data, error: memberError } = await supabase
+      .from("project_members")
+      .insert({
+        project_id: project.id,
+        owner_id: user.id,
+        member_email: memberEmail.trim().toLowerCase(),
+      })
+      .select()
+      .single();
+    if (memberError) {
+      setError(memberError.code === "23505" ? "This email is already on the project." : memberError.message);
+      return;
+    }
+    setMembers((current) => [...current, data as ProjectMember]);
+    setMemberEmail("");
+    setMemberProjectId(project.id);
+    notify("Team member added to project.");
+  }
+
+  async function removeProjectMember(member: ProjectMember) {
+    if (!supabase || !user) return;
+    const { error: removeError } = await supabase
+      .from("project_members")
+      .delete()
+      .eq("id", member.id)
+      .eq("owner_id", user.id);
+    if (removeError) {
+      setError(removeError.message);
+      return;
+    }
+    setMembers((current) => current.filter((item) => item.id !== member.id));
+  }
+
+  async function deleteProject(project: Project) {
+    if (!supabase || !user || !window.confirm("Delete this project? Tasks will remain but become unassigned to a project.")) return;
+    const { error: deleteProjectError } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", project.id)
+      .eq("owner_id", user.id);
+    if (deleteProjectError) {
+      setError(deleteProjectError.message);
+      return;
+    }
+    setProjects((current) => current.filter((item) => item.id !== project.id));
+    setMembers((current) => current.filter((member) => member.project_id !== project.id));
+    setTasks((current) => current.map((task) => task.project_id === project.id ? { ...task, project_id: null } : task));
+    notify("Project deleted.");
   }
 
   if (!ready)
@@ -996,7 +1048,30 @@ export default function Home() {
           <form className="project-create" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !projectName.trim()) return; const { data, error: projectError } = await supabase.from("projects").insert({ owner_id: user.id, name: projectName.trim(), description: projectDescription.trim() }).select().single(); if (projectError) { setError(projectError.message); return; } setProjects((current) => [data as Project, ...current]); setProjectName(""); setProjectDescription(""); notify("Project created."); }}>
             <div className="form-row"><div className="field"><label htmlFor="project-name">New project</label><input id="project-name" value={projectName} onChange={(event) => setProjectName(event.target.value)} maxLength={100} placeholder="e.g. Capstone delivery" required /></div><div className="field"><label htmlFor="project-description">Description</label><input id="project-description" value={projectDescription} onChange={(event) => setProjectDescription(event.target.value)} maxLength={500} placeholder="What is this project about?" /></div></div><button className="btn primary" type="submit">＋ Create project</button>
           </form>
-          <div className="project-grid">{projects.length ? projects.map((project) => <article className="project-card" key={project.id}><div className="project-card-top"><span className="project-icon">▦</span><span className="badge">{tasks.filter((task) => task.project_id === project.id).length} tasks</span></div><h3>{project.name}</h3><p>{project.description || "No description added."}</p><form className="member-form" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !memberEmail.trim()) return; const { data: newMember, error: memberError } = await supabase.from("project_members").insert({ project_id: project.id, owner_id: user.id, member_email: memberEmail.trim().toLowerCase() }).select().single(); if (memberError) setError(memberError.code === "23505" ? "This email is already on the project." : memberError.message); else { setMembers((current) => [...current, newMember as ProjectMember]); setMemberEmail(""); setMemberProjectId(project.id); notify("Team member added to project."); } }}><label htmlFor={"member-" + project.id}>Add team member email</label><div className="member-input-row"><input id={"member-" + project.id} type="email" value={memberProjectId === project.id ? memberEmail : ""} onFocus={() => setMemberProjectId(project.id)} onChange={(event) => { setMemberProjectId(project.id); setMemberEmail(event.target.value); }} placeholder="teammate@example.com" required /><button className="btn small" type="submit">Add</button></div></form><div className="member-list"><strong>Team</strong>{members.filter((member) => member.project_id === project.id).length ? members.filter((member) => member.project_id === project.id).map((member) => <span className="member-chip" key={member.id}>{member.member_email}<button type="button" aria-label={"Remove " + member.member_email} onClick={async () => { if (!supabase || !user) return; const { error: removeError } = await supabase.from("project_members").delete().eq("id", member.id).eq("owner_id", user.id); if (removeError) setError(removeError.message); else setMembers((current) => current.filter((item) => item.id !== member.id)); }}>×</button></span>) : <small>No members added yet.</small>}</div><button className="text-link project-delete" type="button" onClick={async () => { if (!supabase || !user || !window.confirm("Delete this project? Tasks will remain but become unassigned to a project.")) return; const { error: deleteProjectError } = await supabase.from("projects").delete().eq("id", project.id).eq("owner_id", user.id); if (deleteProjectError) setError(deleteProjectError.message); else { setProjects((current) => current.filter((item) => item.id !== project.id)); setMembers((current) => current.filter((member) => member.project_id !== project.id)); setTasks((current) => current.map((task) => task.project_id === project.id ? { ...task, project_id: null } : task)); notify("Project deleted."); } }}>Delete project</button></article>) : <div className="empty"><h3>No projects yet</h3><p>Create a project to group related tasks and add team emails.</p></div>}</div>
+          <div className="project-grid">
+            {projects.length ? projects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                taskCount={tasks.filter((task) => task.project_id === project.id).length}
+                members={members.filter((member) => member.project_id === project.id)}
+                memberEmail={memberProjectId === project.id ? memberEmail : ""}
+                onMemberFocus={setMemberProjectId}
+                onMemberEmailChange={(projectId, value) => {
+                  setMemberProjectId(projectId);
+                  setMemberEmail(value);
+                }}
+                onAddMember={addProjectMember}
+                onRemoveMember={removeProjectMember}
+                onDeleteProject={deleteProject}
+              />
+            )) : (
+              <div className="empty">
+                <h3>No projects yet</h3>
+                <p>Create a project to group related tasks and add team emails.</p>
+              </div>
+            )}
+          </div>
         </section>
         <section className="panel" id="board">
           <div className="panel-head"><div><h2>Kanban board</h2><p>Move work across the five PRD stages.</p></div><span className="badge">{tasks.length} total</span></div>
