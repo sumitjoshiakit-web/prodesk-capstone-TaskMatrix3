@@ -24,7 +24,7 @@ Sprint 15 extends the Sprint 13 TaskMatrix product blueprint and Sprint 14 authe
 
 The Sprint 15 implementation now includes projects, a five-stage board (Backlog, To Do, In Progress, Review, Done), email-based project member records, task assignees, task comments, and an activity feed alongside task CRUD and analytics. Project owners manage their project/member lists; a task's assigned email can sign in to view/update that task and participate in its discussion through RLS policies. Project membership by itself does not grant access to every task in that project; assign tasks explicitly to collaborators. The app still uses a single client page and needs final build, live Supabase/RLS, and deployment verification.
 
-Sprint 15 now restores the Sprint 14 Zustand auth store for the authenticated user payload. Task data, filters, and modal state remain local to the main client page; the large page still needs a component-level refactor.
+Sprint 15 now restores the Sprint 14 Zustand auth store for the authenticated user payload. Task data, filters, and modal state remain local to the main client page. The project-card/team UI and five-stage board are now separate components; authentication UI, task modal, and charts still need extraction.
 
 
 - Projects: create and delete projects; add/remove team member email records.
@@ -74,5 +74,6 @@ Use this checklist during final manual verification; do not mark a check complet
 ## Architecture follow-up before capstone-wide submission
 
 - [x] Restore the Sprint 14 Zustand auth-store integration for the current user payload.
-- [ ] Split the large client page into focused components (for example, `AuthForm`, `TaskTable`, `TaskModal`, and `Charts`) without changing behavior.
+- [x] Extract `ProjectCard` and `TaskBoard` from the large client page.
+- [ ] Extract authentication UI, task modal, and charts into focused components without changing behavior.
 - [ ] Run the updated SQL in the connected Supabase project and verify owner/assignee access with two test accounts.
