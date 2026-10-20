@@ -113,6 +113,18 @@ export default function Home() {
     [supabase, user?.email],
   );
 
+  const loadProjects = useCallback(async (userId: string) => {
+    if (!supabase) return;
+    const { data, error: projectError } = await supabase.from("projects").select("*").eq("owner_id", userId).order("created_at", { ascending: false });
+    if (projectError) {
+      setError(projectError.message.includes("relation") ? "Projects table missing. Run the updated supabase/schema.sql in Supabase SQL Editor." : projectError.message);
+      return;
+    }
+    setProjects((data ?? []) as Project[]);
+    const { data: memberRows, error: memberError } = await supabase.from("project_members").select("*").eq("owner_id", userId).order("created_at", { ascending: true });
+    if (memberError) setError(memberError.message); else setMembers((memberRows ?? []) as ProjectMember[]);
+  }, [supabase]);
+
   useEffect(() => {
     if (!supabase) {
       setReady(true);
@@ -146,7 +158,7 @@ export default function Home() {
       alive = false;
       listener.subscription.unsubscribe();
     };
-  }, [supabase, loadTasks]);
+  }, [supabase, loadTasks, loadProjects]);
 
   // Keep the Sprint 14 route vocabulary while retaining the existing Supabase browser session.
   useEffect(() => {
@@ -166,17 +178,7 @@ export default function Home() {
     }
   }, [ready, user]);
 
-  const loadProjects = useCallback(async (userId: string) => {
-    if (!supabase) return;
-    const { data, error: projectError } = await supabase.from("projects").select("*").eq("owner_id", userId).order("created_at", { ascending: false });
-    if (projectError) {
-      setError(projectError.message.includes("relation") ? "Projects table missing. Run the updated supabase/schema.sql in Supabase SQL Editor." : projectError.message);
-      return;
-    }
-    setProjects((data ?? []) as Project[]);
-    const { data: memberRows, error: memberError } = await supabase.from("project_members").select("*").eq("owner_id", userId).order("created_at", { ascending: true });
-    if (memberError) setError(memberError.message); else setMembers((memberRows ?? []) as ProjectMember[]);
-  }, [supabase]);
+
 
   const filteredTasks = useMemo(
     () =>
