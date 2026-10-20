@@ -79,7 +79,7 @@ export default function Home() {
   const [commentDraft, setCommentDraft] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
-  const [modal, setModal] = useState<"create" | "edit" | "delete" | null>(null);
+  const [modal, setModal] = useState<"create" | "edit" | "delete" | "discussion" | null>(null);
   const [selected, setSelected] = useState<Task | null>(null);
   const [draft, setDraft] = useState<Draft>(blankDraft);
   const [busy, setBusy] = useState(false);
@@ -377,6 +377,35 @@ export default function Home() {
         ? "Nice work — task completed."
         : "Task moved back to To do.",
     );
+  }
+
+  async function moveTask(task: Task, nextStatus: TaskStatus) {
+    if (!supabase || !user) return;
+    const { data, error: updateError } = await supabase.from("tasks").update({ status: nextStatus }).eq("id", task.id).eq("user_id", user.id).select().single();
+    if (updateError) { setError(updateError.message); return; }
+    await supabase.from("task_activity").insert({ task_id: task.id, user_id: user.id, action: `Moved task to ${statusLabel[nextStatus]}` });
+    setTasks((current) => current.map((item) => item.id === task.id ? data as Task : item));
+    notify(`Moved to ${statusLabel[nextStatus]}.`);
+  }
+  async function openTaskDiscussion(task: Task) {
+    if (!supabase || !user) return;
+    setSelected(task); setError(""); setCommentDraft(""); setModal("discussion");
+    const [commentResult, activityResult] = await Promise.all([
+      supabase.from("task_comments").select("*").eq("task_id", task.id).order("created_at", { ascending: true }),
+      supabase.from("task_activity").select("*").eq("task_id", task.id).order("created_at", { ascending: false }),
+    ]);
+    if (commentResult.error) setError(commentResult.error.message); else setComments((commentResult.data ?? []) as Comment[]);
+    if (activityResult.error) setError(activityResult.error.message); else setActivity((activityResult.data ?? []) as Activity[]);
+  }
+  async function addComment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!supabase || !user || !selected || !commentDraft.trim()) return;
+    const { data, error: commentError } = await supabase.from("task_comments").insert({ task_id: selected.id, user_id: user.id, body: commentDraft.trim() }).select().single();
+    if (commentError) { setError(commentError.message); return; }
+    await supabase.from("task_activity").insert({ task_id: selected.id, user_id: user.id, action: "Added a comment" });
+    setComments((current) => [...current, data as Comment]); setCommentDraft("");
+    const { data: activityRows } = await supabase.from("task_activity").select("*").eq("task_id", selected.id).order("created_at", { ascending: false });
+    setActivity((activityRows ?? []) as Activity[]);
   }
 
   if (!ready)
@@ -980,9 +1009,11 @@ export default function Home() {
               {(
                 [
                   { value: "all", label: "All tasks" },
+                  { value: "backlog", label: "Backlog" },
                   { value: "todo", label: "To do" },
                   { value: "in_progress", label: "In progress" },
-                  { value: "done", label: "Completed" },
+                  { value: "review", label: "Review" },
+                  { value: "done", label: "Done" },
                 ] as { value: Filter; label: string }[]
               ).map((item) => (
                 <button
@@ -1126,7 +1157,18 @@ export default function Home() {
             aria-modal="true"
             aria-labelledby="modal-title"
           >
-            {modal === "delete" ? (
+            {modal === "discussion" ? (
+              <>
+                <div className="eyebrow">TASK DISCUSSION</div>
+                <h2 id="modal-title" style={{ marginTop: 10 }}>{selected?.title}</h2>
+                <p className="modal-sub">Comments and recent activity for this task.</p>
+                <div className="discussion-list">{comments.length ? comments.map((comment) => <article className="discussion-item" key={comment.id}><p>{comment.body}</p><small>{comment.user_id === user?.id ? "You" : "Team member"} · {new Date(comment.created_at).toLocaleString()}</small></article>) : <p className="sub">No comments yet. Start the discussion below.</p>}</div>
+                <form onSubmit={addComment} className="comment-form"><div className="field"><label htmlFor="comment-body">Add a comment</label><textarea id="comment-body" value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} maxLength={2000} required placeholder="Share an update or ask a question..." /></div><button className="btn primary" type="submit">Post comment</button></form>
+                <div className="activity-feed"><h3>Activity history</h3>{activity.length ? activity.map((entry) => <div className="activity-entry" key={entry.id}><span className="activity-dot" /><div><p>{entry.action}</p><small>{new Date(entry.created_at).toLocaleString()}</small></div></div>) : <p className="sub">No activity recorded yet.</p>}</div>
+                {error && <div className="error" role="alert">{error}</div>}
+                <div className="modal-actions"><button className="btn" onClick={() => setModal(null)}>Close</button></div>
+              </>
+            ) : modal === "delete" ? (
               <>
                 <div className="eyebrow" style={{ color: "var(--red)" }}>
                   PERMANENT ACTION
@@ -1212,9 +1254,11 @@ export default function Home() {
                           }))
                         }
                       >
+                        <option value="backlog">Backlog</option>
                         <option value="todo">To do</option>
                         <option value="in_progress">In progress</option>
-                        <option value="done">Completed</option>
+                        <option value="review">Review</option>
+                        <option value="done">Done</option>
                       </select>
                     </div>
                     <div className="field">
@@ -1234,6 +1278,17 @@ export default function Home() {
                         <option>High</option>
                       </select>
                     </div>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="task-project">Project</label>
+                    <select id="task-project" value={draft.project_id} onChange={(e) => setDraft((d) => ({ ...d, project_id: e.target.value }))}>
+                      <option value="">No project</option>
+                      {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="task-assignee">Assigned team member email</label>
+                    <input id="task-assignee" type="email" value={draft.assigned_to_email} onChange={(e) => setDraft((d) => ({ ...d, assigned_to_email: e.target.value }))} placeholder="teammate@example.com" />
                   </div>
                   <div className="field">
                     <label htmlFor="task-due">Due date</label>
