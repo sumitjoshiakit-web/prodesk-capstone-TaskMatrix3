@@ -73,6 +73,9 @@ export default function Home() {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const [projectDueDate, setProjectDueDate] = useState("");
+  const [projectStatus, setProjectStatus] = useState<TaskStatus>("todo");
+  const [projectPriority, setProjectPriority] = useState<TaskPriority>("Medium");
   const [memberProjectId, setMemberProjectId] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
@@ -1045,8 +1048,59 @@ export default function Home() {
         </section>
         <section className="panel" id="projects">
           <div className="panel-head"><div><h2>Projects &amp; team</h2><p>Group tasks into projects and keep track of collaborators by email.</p></div></div>
-          <form className="project-create" onSubmit={async (event) => { event.preventDefault(); if (!supabase || !user || !projectName.trim()) return; const { data, error: projectError } = await supabase.from("projects").insert({ owner_id: user.id, name: projectName.trim(), description: projectDescription.trim() }).select().single(); if (projectError) { setError(projectError.message); return; } setProjects((current) => [data as Project, ...current]); setProjectName(""); setProjectDescription(""); notify("Project created."); }}>
-            <div className="form-row"><div className="field"><label htmlFor="project-name">New project</label><input id="project-name" value={projectName} onChange={(event) => setProjectName(event.target.value)} maxLength={100} placeholder="e.g. Capstone delivery" required /></div><div className="field"><label htmlFor="project-description">Description</label><input id="project-description" value={projectDescription} onChange={(event) => setProjectDescription(event.target.value)} maxLength={500} placeholder="What is this project about?" /></div></div><button className="btn primary" type="submit">＋ Create project</button>
+          <form className="project-create" onSubmit={async (event) => {
+            event.preventDefault();
+            if (!supabase || !user || !projectName.trim()) return;
+            setBusy(true);
+            setError("");
+            const { data: projectData, error: projectError } = await supabase
+              .from("projects")
+              .insert({ owner_id: user.id, name: projectName.trim(), description: projectDescription.trim() })
+              .select()
+              .single();
+            if (projectError || !projectData) {
+              setBusy(false);
+              setError(projectError?.message ?? "Could not create project.");
+              return;
+            }
+            // A project starts with a matching task so it is immediately visible on the Kanban board.
+            const { data: taskData, error: taskError } = await supabase
+              .from("tasks")
+              .insert({
+                user_id: user.id,
+                title: projectName.trim(),
+                description: projectDescription.trim() || null,
+                project_id: projectData.id,
+                status: projectStatus,
+                priority: projectPriority,
+                due_date: projectDueDate || null,
+              })
+              .select()
+              .single();
+            if (taskError || !taskData) {
+              await supabase.from("projects").delete().eq("id", projectData.id).eq("owner_id", user.id);
+              setBusy(false);
+              setError(taskError?.message ?? "Project was created but its board card could not be created. Please try again.");
+              return;
+            }
+            setProjects((current) => [projectData as Project, ...current]);
+            setTasks((current) => [taskData as Task, ...current]);
+            setProjectName("");
+            setProjectDescription("");
+            setProjectDueDate("");
+            setProjectStatus("todo");
+            setProjectPriority("Medium");
+            setBusy(false);
+            notify("Project created and added to the Kanban board.");
+          }}>
+            <div className="form-row">
+              <div className="field"><label htmlFor="project-name">New project</label><input id="project-name" value={projectName} onChange={(event) => setProjectName(event.target.value)} maxLength={100} placeholder="e.g. Capstone delivery" required /></div>
+              <div className="field"><label htmlFor="project-description">Description</label><input id="project-description" value={projectDescription} onChange={(event) => setProjectDescription(event.target.value)} maxLength={500} placeholder="What is this project about?" /></div>
+              <div className="field"><label htmlFor="project-due-date">Due date</label><input id="project-due-date" type="date" value={projectDueDate} onChange={(event) => setProjectDueDate(event.target.value)} /></div>
+              <div className="field"><label htmlFor="project-status">Initial status</label><select id="project-status" value={projectStatus} onChange={(event) => setProjectStatus(event.target.value as TaskStatus)}><option value="backlog">Backlog</option><option value="todo">To do</option><option value="in_progress">In progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
+              <div className="field"><label htmlFor="project-priority">Priority</label><select id="project-priority" value={projectPriority} onChange={(event) => setProjectPriority(event.target.value as TaskPriority)}><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select></div>
+            </div>
+            <button className="btn primary" type="submit" disabled={busy}>{busy ? "Creating…" : "＋ Create project"}</button>
           </form>
           <div className="project-grid">
             {projects.length ? projects.map((project) => (
