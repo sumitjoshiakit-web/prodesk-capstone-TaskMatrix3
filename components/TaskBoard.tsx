@@ -42,6 +42,10 @@ export default function TaskBoard({ tasks, projects, onMoveTask, onOpenDiscussio
                 <article className="kanban-card" key={task.id}>
                   <strong>{task.title}</strong>
                   <p>{task.description || "No description"}</p>
+                  <div className="kanban-task-meta">
+                    <small>Priority: <b>{task.priority}</b></small>
+                    <small>Due: <b>{task.due_date ? new Date(task.due_date + "T00:00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not set"}</b></small>
+                  </div>
                   {task.project_id && (
                     <small>Project: {projects.find((project) => project.id === task.project_id)?.name ?? "Project"}</small>
                   )}
