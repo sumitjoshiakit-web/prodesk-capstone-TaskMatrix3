@@ -94,7 +94,8 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = public
-as $$declare
+as $
+declare
   current_email text := lower(coalesce(auth.jwt() ->> 'email', ''));
   is_owner boolean;
 begin
