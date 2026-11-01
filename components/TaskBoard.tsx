@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import type { DragEvent } from "react";
 import type { Task, TaskStatus } from "@/lib/supabase";
 
 type ProjectSummary = { id: string; name: string };
@@ -20,12 +22,30 @@ const labels: Record<TaskStatus, string> = {
 };
 
 export default function TaskBoard({ tasks, projects, onMoveTask, onOpenDiscussion }: TaskBoardProps) {
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dragOverStatus, setDragOverStatus] = useState<TaskStatus | null>(null);
+
+  function handleDragStart(event: DragEvent<HTMLElement>, task: Task) {
+    setDraggedTaskId(task.id);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", task.id);
+  }
+
+  function handleDrop(event: DragEvent<HTMLElement>, status: TaskStatus) {
+    event.preventDefault();
+    const taskId = event.dataTransfer.getData("text/plain") || draggedTaskId;
+    const task = tasks.find((item) => item.id === taskId);
+    if (task && task.status !== status) onMoveTask(task, status);
+    setDraggedTaskId(null);
+    setDragOverStatus(null);
+  }
+
   return (
     <section className="panel" id="board">
       <div className="panel-head">
         <div>
           <h2>Kanban board</h2>
-          <p>Move work across the five PRD stages.</p>
+          <p>Drag and drop cards between stages, or use the arrow controls.</p>
         </div>
         <span className="badge">{tasks.length} total</span>
       </div>
@@ -33,13 +53,13 @@ export default function TaskBoard({ tasks, projects, onMoveTask, onOpenDiscussio
         {statuses.map((status, index) => {
           const columnTasks = tasks.filter((task) => task.status === status);
           return (
-            <section className="kanban-column" key={status}>
+            <section className={"kanban-column" + (dragOverStatus === status ? " drag-over" : "")} key={status} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setDragOverStatus(status); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragOverStatus(null); }} onDrop={(event) => handleDrop(event, status)} aria-label={labels[status] + " tasks"}>
               <div className="kanban-heading">
                 <h3>{labels[status]}</h3>
                 <span>{columnTasks.length}</span>
               </div>
               {columnTasks.map((task) => (
-                <article className="kanban-card" key={task.id}>
+                <article className={"kanban-card" + (draggedTaskId === task.id ? " is-dragging" : "")} key={task.id} draggable onDragStart={(event) => handleDragStart(event, task)} onDragEnd={() => { setDraggedTaskId(null); setDragOverStatus(null); }} aria-label={task.title + ", draggable task"}>
                   <strong>{task.title}</strong>
                   <p>{task.description || "No description"}</p>
                   <div className="kanban-task-meta">
