@@ -1610,6 +1610,10 @@ body {
 .project-delete { margin-top: 15px; color: var(--red); }
 .kanban-board { display: grid; grid-template-columns: repeat(5, minmax(180px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
 .kanban-column { min-width: 180px; padding: 10px; border-radius: 12px; background: #f4f5f9; }
+.kanban-column.drag-over { background: #e8edff; outline: 2px dashed var(--accent, #6475d8); outline-offset: -2px; }
+.kanban-card[draggable="true"] { cursor: grab; }
+.kanban-card[draggable="true"]:active { cursor: grabbing; }
+.kanban-card.is-dragging { opacity: .45; transform: scale(.98); }
 .kanban-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 3px 12px; }
 .kanban-heading h3 { margin: 0; font: 700 12px Manrope, sans-serif; }
 .kanban-heading span { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 7px; background: white; color: var(--muted); font-size: 11px; }
