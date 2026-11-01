@@ -25,6 +25,17 @@ create index if not exists tasks_user_created_idx on public.tasks (user_id, crea
 create index if not exists tasks_user_status_idx on public.tasks (user_id, status);
 alter table public.tasks enable row level security;
 
+-- Create projects before task policies that reference public.projects.
+create table if not exists public.projects (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  name text not null check (char_length(trim(name)) between 1 and 100),
+  description text not null default '',
+  created_at timestamptz not null default now()
+);
+create index if not exists projects_owner_created_idx on public.projects(owner_id, created_at desc);
+
+
 drop policy if exists "Users can view own tasks" on public.tasks;
 drop policy if exists "Owners and assignees can view tasks" on public.tasks;
 create policy "Owners and assignees can view tasks" on public.tasks for select to authenticated using (auth.uid() = user_id or lower(coalesce(auth.jwt() ->> 'email', '')) = lower(coalesce(assigned_to_email, '')));
@@ -73,14 +84,6 @@ grant select, insert, update, delete on public.tasks to authenticated;
 -- Sprint 15 PRD expansion: projects, five-stage workflow, team assignment,
 -- task comments, and an audit-friendly activity feed.
 
-create table if not exists public.projects (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  name text not null check (char_length(trim(name)) between 1 and 100),
-  description text not null default '',
-  created_at timestamptz not null default now()
-);
-create index if not exists projects_owner_created_idx on public.projects(owner_id, created_at desc);
 update public.tasks t set project_id = null where t.project_id is not null and not exists (select 1 from public.projects p where p.id = t.project_id);
 alter table public.tasks drop constraint if exists tasks_project_id_fkey;
 alter table public.tasks add constraint tasks_project_id_fkey foreign key (project_id) references public.projects(id) on delete set null;
