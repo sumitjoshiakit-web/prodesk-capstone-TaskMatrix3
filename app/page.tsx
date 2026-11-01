@@ -1085,6 +1085,8 @@ export default function Home() {
             }
             setProjects((current) => [projectData as Project, ...current]);
             setTasks((current) => [taskData as Task, ...current]);
+            setFilter("all");
+            setSearch("");
             setProjectName("");
             setProjectDescription("");
             setProjectDueDate("");
